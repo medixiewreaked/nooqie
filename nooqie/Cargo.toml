@@ -1,0 +1,8 @@
+[package]
+name = "nooqie"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+dotenvy = "0.15.7"
+tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
