@@ -2,6 +2,7 @@
 use serenity::async_trait;
 use serenity::framework::standard::macros::group;
 use serenity::framework::standard::{Configuration, StandardFramework};
+
 use serenity::prelude::*;
 
 use std::env;
@@ -10,9 +11,10 @@ use std::error::Error;
 mod commands;
 
 use crate::commands::utils::*;
+use crate::commands::llama::*;
 
 #[group]
-#[commands(ping)]
+#[commands(ping, llm)]
 struct General;
 
 struct Handler;
@@ -23,7 +25,8 @@ impl EventHandler for Handler { }
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenvy::dotenv()?;
-    let token = env::var("DISCORD_TOKEN").expect("'DISCORD_TOKEN' environment variable not set");
+    let token = env::var("DISCORD_TOKEN")
+        .expect("'DISCORD_TOKEN' environment variable not set");
 
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
