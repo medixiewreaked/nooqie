@@ -31,7 +31,7 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
         .await
         .unwrap();
 
-    let anwser = prompt_llama(msg.content.strip_prefix("!llm ").expect("could not strip prefix '!llm '"))
+    let anwser = prompt_ollama(msg.content.strip_prefix("!llm ").expect("could not strip prefix '!llm '"))
         .await
         .unwrap();
 
@@ -44,12 +44,12 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-async fn prompt_llama(prompt: &str) -> Result<String, Box<dyn Error>> {
-    let model = env::var("LLAMA_MODEL")
-        .expect("'LLAMA_MODEL' environment variable not set");
+async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
+    let model = env::var("OLLAMA_MODEL")
+        .expect("'OLLAMA_MODEL' environment variable not set");
 
-    let post_url = env::var("LLAMA_POST_URL")
-        .expect("'LLAMA_IP' environment variable not set");
+    let post_url = env::var("OLLAMA_POST_URL")
+        .expect("'OLLAMA_IP' environment variable not set");
 
     let client = reqwest::Client::new();
 

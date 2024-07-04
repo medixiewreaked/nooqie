@@ -11,7 +11,7 @@ use std::error::Error;
 mod commands;
 
 use crate::commands::utils::*;
-use crate::commands::llama::*;
+use crate::commands::ollama::*;
 
 #[group]
 #[commands(ping, llm)]
