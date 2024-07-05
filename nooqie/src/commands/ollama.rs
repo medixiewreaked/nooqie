@@ -39,6 +39,9 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
         .content(anwser.clone());
 
     if let Err(why) = new_msg.edit(ctx.clone(), builder).await {
+        if why.source().unwrap().to_string() == "Unknown Message" {
+            new_msg.channel_id.say(&ctx.http, anwser).await?;
+        }
         println!("Error sending message: {why:?}");
     }
     Ok(())
