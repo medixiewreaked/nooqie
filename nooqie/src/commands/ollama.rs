@@ -65,8 +65,8 @@ async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
         .await;
 
     match response {
-        Ok(T) => {
-            let response_text = T.text()
+        Ok(t) => {
+            let response_text = t.text()
                 .await
                 .expect("Invalid response could not parse to text");
             let air: AIResponse = serde_json::from_str(&response_text)?;
@@ -74,8 +74,8 @@ async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
             return Ok(air.response)
 
         },
-        Err(E) => {
-            error!("failed to connect to Ollama server: {E}");
+        Err(e) => {
+            error!("failed to connect to Ollama server: {e}");
             return Ok(String::from("I seem to have dropped my brain :brain:"))
         }
     }
