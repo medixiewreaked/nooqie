@@ -1,4 +1,7 @@
 #![allow(deprecated)]
+
+use log::{error, info};
+
 use serenity::async_trait;
 use serenity::framework::standard::macros::group;
 use serenity::framework::standard::{Configuration, StandardFramework};
@@ -28,6 +31,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let token = env::var("DISCORD_TOKEN")
         .expect("'DISCORD_TOKEN' environment variable not set");
 
+    let env = env_logger::Env::new();
+
+    env_logger::init_from_env(env);
+
+    info!("Starting...");
+
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
@@ -46,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .expect("Err creating client");
 
     if let Err(why) = client.start().await {
-        println!("Client error: {why:?}");
+        error!("Client error: {why:?}");
     }
 
     Ok(())
