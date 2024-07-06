@@ -1,3 +1,4 @@
+use log::{debug, error};
 use serde::{Deserialize, Serialize};
 use serenity::model::channel::Message;
 use serenity::builder::CreateMessage;
@@ -40,9 +41,10 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
 
     if let Err(why) = new_msg.edit(ctx.clone(), builder).await {
         if why.source().unwrap().to_string() == "Unknown Message" {
+            debug!("original message deleted sending new message");
             new_msg.channel_id.say(&ctx.http, anwser).await?;
         }
-        println!("Error sending message: {why:?}");
+        error!("Error sending message: {why:?}");
     }
     Ok(())
 }
@@ -56,16 +58,25 @@ async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
 
     let client = reqwest::Client::new();
 
+    debug!("[Ollama] prompt: '{}'", prompt);
     let response = client.post(post_url)
         .body(format!(r##"{{"model": "{model}", "prompt": "{prompt}", "stream": false }}"##, model=model, prompt=prompt))
         .send()
-        .await?;
+        .await;
 
-    let response_text = response.text()
-        .await
-        .expect("Invalid response could not parse to text");
+    match response {
+        Ok(T) => {
+            let response_text = response.text()
+                .await
+                .expect("Invalid response could not parse to text");
+            let air: AIResponse = serde_json::from_str(&response_text)?;
+            debug!("[Ollama] received: '{}'", air.response);
+            return Ok(air.response)
 
-    let air: AIResponse = serde_json::from_str(&response_text)?;
-
-    return Ok(air.response)
+        },
+        Err(E) => {
+            error!("failed to connect to Ollama server: {E}");
+            return Ok(String::from("I seem to have dropped my brain :brain:"))
+        }
+    }
 }
