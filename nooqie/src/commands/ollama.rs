@@ -66,7 +66,7 @@ async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
 
     match response {
         Ok(T) => {
-            let response_text = response.text()
+            let response_text = T.text()
                 .await
                 .expect("Invalid response could not parse to text");
             let air: AIResponse = serde_json::from_str(&response_text)?;
