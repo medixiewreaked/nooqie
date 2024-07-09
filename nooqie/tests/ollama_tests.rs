@@ -3,6 +3,15 @@
 use nooqie::commands::*;
 
 #[test]
-fn test_fail() {
-    assert_eq!(1, 0);
+fn test_json_strip_escape_valid_input() {
+    let _test_data = r#"nothing to strip"#;
+    let result = ollama::json_strip_escape(&_test_data);
+    assert_eq!(result, r#"nothing to strip"#);
+}
+
+#[test]
+fn test_json_strip_escape_invalid_input() {
+    let _test_data = r#""every/thing" to \strip"#;
+    let result = ollama::json_strip_escape(&_test_data);
+    assert_eq!(result, r#"\"every\/thing\" to \\strip"#);
 }
