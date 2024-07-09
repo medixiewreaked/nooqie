@@ -1,4 +1,5 @@
 use log::{debug, error};
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serenity::model::channel::Message;
 use serenity::builder::CreateMessage;
@@ -49,7 +50,7 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
-async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
+pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
     let model = env::var("OLLAMA_MODEL")
         .expect("'OLLAMA_MODEL' environment variable not set");
 
@@ -57,6 +58,9 @@ async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
         .expect("'OLLAMA_IP' environment variable not set");
 
     let client = reqwest::Client::new();
+
+    let model = json_strip_escape(&model);
+    let prompt = json_strip_escape(&prompt);
 
     debug!("[Ollama] prompt: '{}'", prompt);
     let response = client.post(post_url)
@@ -79,4 +83,15 @@ async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
             return Ok(String::from("I seem to have dropped my brain :brain:"))
         }
     }
+}
+
+pub fn json_strip_escape(string: &str) -> String {
+    let re_backslash = Regex::new(r#"\\"#).unwrap();
+    let re_forwardslash = Regex::new(r#"/"#).unwrap();
+    let re_doublequotes = Regex::new(r#"""#).unwrap();
+
+    let string = re_backslash.replace_all(&string, r#"\\"#);
+    let string = re_forwardslash.replace_all(&string, r#"\/"#);
+    let string = re_doublequotes.replace_all(&string, r#"\""#);
+    String::from(string)
 }
