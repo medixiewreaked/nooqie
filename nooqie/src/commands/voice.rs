@@ -41,6 +41,30 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
+#[command]
+#[only_in(guilds)]
+async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
+    let guild_id = msg.guild_id.unwrap();
+
+    let manager = songbird::get(ctx)
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    let has_handler = manager.get(guild_id).is_some();
+
+    if has_handler {
+        if let Err(e) = manager.remove(guild_id).await {
+            error!("failed to disconnect: {:?}", e);
+        }
+        debug!("disconnected from voice channel");
+    } else {
+        error!("not in voice channel");
+    }
+
+    Ok(())
+}
+
 struct TrackErrorNotifier;
 
 #[async_trait]

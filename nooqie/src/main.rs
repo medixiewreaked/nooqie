@@ -20,7 +20,7 @@ use crate::commands::ollama::*;
 use crate::commands::voice::*;
 
 #[group]
-#[commands(ping, llm, join)]
+#[commands(ping, llm, join, leave)]
 struct General;
 
 struct Handler;
