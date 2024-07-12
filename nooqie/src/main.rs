@@ -5,6 +5,7 @@ use log::{error, info};
 use serenity::async_trait;
 use serenity::framework::standard::macros::group;
 use serenity::framework::standard::{Configuration, StandardFramework};
+use serenity::model::gateway::Ready;
 
 use serenity::prelude::*;
 
@@ -26,7 +27,11 @@ struct General;
 struct Handler;
 
 #[async_trait]
-impl EventHandler for Handler { }
+impl EventHandler for Handler {
+    async fn ready(&self, _: Context, ready: Ready) {
+        info!("{} is connected", ready.user.name);
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
