@@ -2,6 +2,8 @@ use log::{debug, error};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serenity::model::channel::Message;
+use serenity::gateway::ActivityData;
+use serenity::model::user::OnlineStatus;
 use serenity::builder::CreateMessage;
 use serenity::all::EditMessage;
 use serenity::framework::standard::macros::command;
@@ -28,6 +30,10 @@ struct AIResponse {
 
 #[command]
 pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut status = OnlineStatus::DoNotDisturb;
+    let mut activity = ActivityData::custom("thinking...");
+    ctx.set_presence(Some(activity), status);
+
     let mut new_msg = msg.channel_id
         .send_message(ctx.clone(), CreateMessage::new().content("..."))
         .await
@@ -47,6 +53,9 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
         }
         error!("Error sending message: {why:?}");
     }
+    status = OnlineStatus::Online;
+    activity = ActivityData::custom("");
+    ctx.set_presence(Some(activity), status);
     Ok(())
 }
 
@@ -86,12 +95,24 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
 }
 
 pub fn json_strip_escape(string: &str) -> String {
-    let re_backslash = Regex::new(r#"\\"#).unwrap();
-    let re_forwardslash = Regex::new(r#"/"#).unwrap();
-    let re_doublequotes = Regex::new(r#"""#).unwrap();
+    let re_reverse_solidus = Regex::new(r#"\\"#).unwrap();
+    let re_solidus = Regex::new(r#"/"#).unwrap();
+    let re_quotation_mark = Regex::new(r#"""#).unwrap();
+    // let re_backspace = Regex::new(r#"\b"#).unwrap();
+    // let re_formfeed = Regex::new(r#"\f"#).unwrap();
+    let re_linefeed = Regex::new(r#"\n"#).unwrap();
+    // let re_carriage_return = Regex::new(r#"\r"#).unwrap();
+    // let re_horizontal_tab = Regex::new(r#"\t"#).unwrap();
+    // let re_hex = Regex::new(r#"/\u[a-fA-F0-9]{8}"#).unwrap();
 
-    let string = re_backslash.replace_all(&string, r#"\\"#);
-    let string = re_forwardslash.replace_all(&string, r#"\/"#);
-    let string = re_doublequotes.replace_all(&string, r#"\""#);
+    let string = re_linefeed.replace_all(&string, r#" "#);
+    // let string = re_backspace.replace_all(&string, r#" "#);
+    // let string = re_formfeed.replace_all(&string, r#" "#);
+    // let string = re_carriage_return.replace_all(&string, r#" "#);
+    // let string = re_horizontal_tab.replace_all(&string, r#"    "#);
+
+    let string = re_reverse_solidus.replace_all(&string, r#"\\"#);
+    let string = re_solidus.replace_all(&string, r#"\/"#);
+    let string = re_quotation_mark.replace_all(&string, r#"\""#);
     String::from(string)
 }
