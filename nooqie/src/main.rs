@@ -20,8 +20,10 @@ use crate::commands::utils::*;
 use crate::commands::ollama::*;
 use crate::commands::voice::*;
 
+use reqwest::Client as HttpClient;
+
 #[group]
-#[commands(ping, llm, join, leave)]
+#[commands(ping, llm, join, leave, play)]
 struct General;
 
 struct Handler;
@@ -64,6 +66,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .event_handler(Handler)
             .framework(framework)
             .register_songbird()
+            .type_map_insert::<HttpKey>(HttpClient::new())
             .await
             .expect("Err creating client");
 

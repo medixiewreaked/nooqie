@@ -2,11 +2,22 @@ use log::{debug, error};
 
 use serenity::model::channel::Message;
 use serenity::framework::standard::macros::command;
-use serenity::framework::standard::CommandResult;
+use serenity::framework::standard::{Args, CommandResult};
 use serenity::async_trait;
+use serenity::prelude::TypeMapKey;
 
 use songbird::events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent};
+use songbird::input::YoutubeDl;
+
 use serenity::client::Context;
+
+use reqwest::Client as HttpClient;
+
+pub struct HttpKey;
+
+impl TypeMapKey for HttpKey {
+    type Value = HttpClient;
+}
 
 #[command]
 #[only_in(guilds)]
@@ -79,5 +90,42 @@ impl VoiceEventHandler for TrackErrorNotifier {
             }
         }
         None
+    }
+}
+
+#[command]
+#[only_in(guilds)]
+async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let url = match args.single::<String>() {
+        Ok(url) => url,
+        Err(_) => {
+            error!("must provide a URL to a video or audio");
+            return Ok(());
+        }
+    };
+
+    let guild_id = msg.guild_id.unwrap();
+
+    let http_client = {
+        let data = ctx.data.read().await;
+        data.get::<HttpKey>()
+            .cloned()
+            .expect("Guaranteed to exist in the typemap.")
+    };
+
+    let manager = songbird::get(ctx)
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let mut handler = handler_lock.lock().await;
+        let src = YoutubeDl::new(http_client, url);
+        let _ = handler.play_input(src.clone().into());
+        debug!("playing audio");
+        Ok(())
+    } else {
+        debug!("no search available");
+        Ok(())
     }
 }
