@@ -70,9 +70,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .expect("Err creating client");
 
-    if let Err(why) = client.start().await {
-        error!("Client error: {why:?}");
-    }
+    tokio::spawn(async move {
+        let _ = client
+            .start()
+            .await
+            .map_err(|why| error!("client ended: {:?}", why));
+    });
+
+    let _signal_err = tokio::signal::ctrl_c().await;
+    info!("Received Ctrl-C, shutting down.");
 
     Ok(())
 }
