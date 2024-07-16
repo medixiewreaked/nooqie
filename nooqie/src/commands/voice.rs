@@ -8,10 +8,13 @@ use serenity::prelude::TypeMapKey;
 
 use songbird::events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent};
 use songbird::input::YoutubeDl;
+use songbird::Songbird;
 
 use serenity::client::Context;
+use serenity::all::GuildId;
 
 use reqwest::Client as HttpClient;
+use std::sync::Arc;
 
 pub struct HttpKey;
 
@@ -49,6 +52,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
         let mut handler = handler_lock.lock().await;
         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
+
     Ok(())
 }
 
@@ -96,6 +100,28 @@ impl VoiceEventHandler for TrackErrorNotifier {
 #[command]
 #[only_in(guilds)]
 async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let (guild_id, channel_id) = {
+        let guild = msg.guild(&ctx.cache).unwrap();
+        let channel_id = guild
+            .voice_states
+            .get(&msg.author.id)
+            .and_then(|voice_states| voice_states.channel_id);
+        (guild.id, channel_id)
+    };
+
+    let connect_to = match channel_id {
+        Some(channel) => channel,
+        None => {
+            error!("user not in voice channel");
+            return Ok(());
+        }
+    };
+
+    let manager = songbird::get(&ctx)
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
     let url = match args.single::<String>() {
         Ok(url) => url,
         Err(_) => {
@@ -103,6 +129,12 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             return Ok(());
         }
     };
+
+    debug!("joining channel");
+    if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
+        let mut handler = handler_lock.lock().await;
+        handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
+    }
 
     let guild_id = msg.guild_id.unwrap();
 
@@ -113,19 +145,44 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .expect("Guaranteed to exist in the typemap.")
     };
 
-    let manager = songbird::get(ctx)
-        .await
-        .expect("Songbird Voice client placed in at initialisation.")
-        .clone();
-
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
         let src = YoutubeDl::new(http_client, url);
-        let _ = handler.play_input(src.clone().into());
+        let song = handler.play_input(src.clone().into());
         debug!("playing audio");
-        Ok(())
+        let _ = song.add_event(
+            Event::Track(TrackEvent::End),
+            SongEndLeaver {
+                manager,
+                guild_id
+            },
+        );
     } else {
         debug!("no search available");
-        Ok(())
+    }
+
+    Ok(())
+}
+
+struct SongEndLeaver {
+    manager: Arc<Songbird>,
+    guild_id: GuildId
+}
+
+#[async_trait]
+impl VoiceEventHandler for SongEndLeaver {
+    async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
+        let has_handler = self.manager.get(self.guild_id).is_some();
+
+        if has_handler {
+            if let Err(e) = self.manager.remove(self.guild_id).await {
+                error!("failed to disconnect: {:?}", e);
+            }
+            debug!("disconnected from voice channel");
+        } else {
+            error!("not in voice channel");
+        }
+
+        None
     }
 }
