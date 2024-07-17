@@ -148,8 +148,8 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
         let src = YoutubeDl::new(http_client, url);
-        let song = handler.play_input(src.clone().into());
-        debug!("playing audio");
+        let song = handler.enqueue_input(src.into()).await;
+        debug!("added audio to queue");
         let _ = song.add_event(
             Event::Track(TrackEvent::End),
             SongEndLeaver {
@@ -172,6 +172,14 @@ struct SongEndLeaver {
 #[async_trait]
 impl VoiceEventHandler for SongEndLeaver {
     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
+
+        if let Some(handler_lock) = self.manager.get(self.guild_id) {
+            let handler = handler_lock.lock().await;
+            if handler.queue().len() > 0 {
+                return None
+            }
+        }
+
         let has_handler = self.manager.get(self.guild_id).is_some();
 
         if has_handler {
