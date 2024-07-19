@@ -215,3 +215,25 @@ async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+#[only_in(guilds)]
+async fn clear(ctx: &Context, msg: &Message) -> CommandResult {
+    let guild_id = msg.guild_id.unwrap();
+
+    let manager = songbird::get(ctx)
+        .await
+        .expect("Songbird Voice client placed in at installation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        let queue = handler.queue();
+        queue.stop();
+        debug!("queue cleared");
+    } else {
+        error!("failed to clear queue");
+    }
+
+    Ok(())
+}

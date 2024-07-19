@@ -23,7 +23,7 @@ use crate::commands::voice::*;
 use reqwest::Client as HttpClient;
 
 #[group]
-#[commands(ping, llm, join, leave, play, skip)]
+#[commands(ping, llm, join, leave, play, skip, clear)]
 struct General;
 
 struct Handler;
