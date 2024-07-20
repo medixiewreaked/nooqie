@@ -1,5 +1,6 @@
 use log::{debug, error};
 
+use serenity::all::{ActivityData, OnlineStatus};
 use serenity::model::channel::Message;
 use serenity::framework::standard::macros::command;
 use serenity::framework::standard::{Args, CommandResult};
@@ -130,6 +131,15 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
+    let loop_amount = match args.single::<usize>() {
+        Ok(loop_amount) => loop_amount,
+        Err(_) => {
+            debug!("not looping");
+            let loop_amount = 0;
+            loop_amount
+        }
+    };
+
     debug!("joining channel");
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
@@ -145,16 +155,27 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .expect("Guaranteed to exist in the typemap.")
     };
 
+    let status = OnlineStatus::DoNotDisturb;
+    let activity = ActivityData::playing("Darude - Sandstorm");
+    ctx.set_presence(Some(activity), status);
+
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
         let src = YoutubeDl::new(http_client, url);
         let song = handler.enqueue_input(src.into()).await;
         debug!("added audio to queue");
+
+        if loop_amount > 0 {
+            let _ = song.loop_for(loop_amount);
+            debug!("looping audio track for {}", loop_amount.to_string().as_str());
+        };
+
         let _ = song.add_event(
             Event::Track(TrackEvent::End),
             SongEndLeaver {
                 manager,
-                guild_id
+                guild_id,
+                ctx: ctx.clone()
             },
         );
     } else {
@@ -166,7 +187,8 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
 struct SongEndLeaver {
     manager: Arc<Songbird>,
-    guild_id: GuildId
+    guild_id: GuildId,
+    ctx: Context
 }
 
 #[async_trait]
@@ -187,6 +209,10 @@ impl VoiceEventHandler for SongEndLeaver {
                 error!("failed to disconnect: {:?}", e);
             }
             debug!("disconnected from voice channel");
+            let status = OnlineStatus::Online;
+            let activity = ActivityData::custom("");
+            self.ctx.set_presence(Some(activity), status);
+
         } else {
             error!("not in voice channel");
         }
