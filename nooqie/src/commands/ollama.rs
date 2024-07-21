@@ -1,14 +1,18 @@
 use log::{debug, error};
+
 use regex::Regex;
+
 use serde::{Deserialize, Serialize};
-use serenity::model::channel::Message;
-use serenity::gateway::ActivityData;
-use serenity::model::user::OnlineStatus;
-use serenity::builder::CreateMessage;
+
 use serenity::all::EditMessage;
+use serenity::builder::CreateMessage;
 use serenity::framework::standard::macros::command;
 use serenity::framework::standard::CommandResult;
+use serenity::gateway::ActivityData;
+use serenity::model::channel::Message;
+use serenity::model::user::OnlineStatus;
 use serenity::prelude::*;
+
 use std::env;
 use std::error::Error;
 
