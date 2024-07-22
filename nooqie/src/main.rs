@@ -51,7 +51,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT
         | GatewayIntents::GUILDS
-        | GatewayIntents::GUILD_MEMBERS
         | GatewayIntents::GUILD_VOICE_STATES;
 
     let framework = StandardFramework::new()
