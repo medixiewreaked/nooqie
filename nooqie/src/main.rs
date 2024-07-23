@@ -56,8 +56,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let framework = StandardFramework::new()
         .group(&GENERAL_GROUP);
 
-    framework.configure(Configuration::new()
-                        .prefix("!"));
+    match env::var("NOOQIE_PREFIX") {
+        Ok(prefix) => {
+            framework.configure(Configuration::new()
+                .prefix(prefix));
+        },
+        Err(_) => {
+            framework.configure(Configuration::new()
+                .prefix("!"));
+        }
+    };
 
     let mut client =
         Client::builder(&token, intents)
