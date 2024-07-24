@@ -10,6 +10,7 @@ Nooqie is a Discord bot with basic LLM functionality though the Ollama API
 **Environment variables**:
 ```bash
 export DISCORD_TOKEN="your token here"
+export NOOQIE_PREFIX="!" # <optional>
 export OLLAMA_POST_URL="http://your.url/api/generate" # <optional>
 export OLLAMA_MODEL="llama2-uncensored" # <optional>
 export RUST_LOG=none,nooqie=info # <optional>
