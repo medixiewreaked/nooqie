@@ -1,16 +1,35 @@
-use log::{debug, error};
+use log::{
+    debug,
+    error
+};
 
-use serenity::all::{ActivityData, GuildId, OnlineStatus};
-use serenity::async_trait;
-use serenity::client::Context;
-use serenity::framework::standard::{Args, CommandResult};
-use serenity::framework::standard::macros::command;
-use serenity::model::channel::Message;
-use serenity::prelude::TypeMapKey;
+use serenity::{
+    all::{
+        ActivityData,
+        GuildId,
+        OnlineStatus
+    },
+    async_trait,
+    client::Context,
+    framework::standard::{
+        Args,
+        CommandResult,
+        macros::command
+    },
+    model::channel::Message,
+    prelude::TypeMapKey
+};
 
-use songbird::events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent};
-use songbird::input::YoutubeDl;
-use songbird::Songbird;
+use songbird::{
+    events::{
+        Event,
+        EventContext,
+        EventHandler as VoiceEventHandler,
+        TrackEvent
+    },
+    input::YoutubeDl,
+    Songbird
+};
 
 use std::sync::Arc;
 

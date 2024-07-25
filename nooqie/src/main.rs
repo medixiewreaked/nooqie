@@ -1,12 +1,22 @@
 #![allow(deprecated)]
 
-use log::{error, info};
+use log::{
+    error,
+    info
+};
 
-use serenity::async_trait;
-use serenity::framework::standard::{Configuration, StandardFramework};
-use serenity::framework::standard::macros::group;
-use serenity::model::gateway::Ready;
-use serenity::prelude::*;
+use serenity::{
+    async_trait,
+    framework::{
+        standard::{
+            Configuration,
+            macros::group,
+            StandardFramework
+        },
+    },
+    model::gateway::Ready,
+    prelude::*
+};
 
 use songbird::SerenityInit;
 
@@ -15,9 +25,11 @@ use std::error::Error;
 
 mod commands;
 
-use crate::commands::ollama::*;
-use crate::commands::utils::*;
-use crate::commands::voice::*;
+use crate::commands::{
+    ollama::*,
+    utils::*,
+    voice::*
+};
 
 use reqwest::Client as HttpClient;
 

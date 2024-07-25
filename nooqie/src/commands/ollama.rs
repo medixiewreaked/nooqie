@@ -1,20 +1,34 @@
-use log::{debug, error};
+use log::{
+    debug,
+    error
+};
 
 use regex::Regex;
 
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize
+};
 
-use serenity::all::EditMessage;
-use serenity::builder::CreateMessage;
-use serenity::framework::standard::macros::command;
-use serenity::framework::standard::CommandResult;
-use serenity::gateway::ActivityData;
-use serenity::model::channel::Message;
-use serenity::model::user::OnlineStatus;
-use serenity::prelude::*;
+use serenity::{
+    all::EditMessage,
+    builder::CreateMessage,
+    framework::standard::{
+        macros::command,
+        CommandResult
+    },
+    gateway::ActivityData,
+    model::{
+        channel::Message,
+        user::OnlineStatus,
+    },
+    prelude::*
+};
 
-use std::env;
-use std::error::Error;
+use std::{
+    env,
+    error::Error
+};
 
 #[derive(Serialize, Deserialize)]
 struct AIResponse {
