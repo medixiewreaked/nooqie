@@ -173,10 +173,6 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .expect("Guaranteed to exist in the typemap.")
     };
 
-    let status = OnlineStatus::DoNotDisturb;
-    let activity = ActivityData::playing("Darude - Sandstorm");
-    ctx.set_presence(Some(activity), status);
-
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
         let src = YoutubeDl::new(http_client, url);
@@ -189,12 +185,20 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         };
 
         let _ = song.add_event(
+            Event::Track(TrackEvent::Play),
+    
+            AudioTrackStart {
+                ctx: ctx.clone()
+            }
+        );
+
+        let _ = song.add_event(
             Event::Track(TrackEvent::End),
-            SongEndLeaver {
+            AudioTrackEnd {
                 manager,
                 guild_id,
                 ctx: ctx.clone()
-            },
+            }
         );
     } else {
         debug!("no search available");
@@ -203,14 +207,14 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     Ok(())
 }
 
-struct SongEndLeaver {
+struct AudioTrackEnd {
     manager: Arc<Songbird>,
     guild_id: GuildId,
     ctx: Context
 }
 
 #[async_trait]
-impl VoiceEventHandler for SongEndLeaver {
+impl VoiceEventHandler for AudioTrackEnd {
     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
 
         if let Some(handler_lock) = self.manager.get(self.guild_id) {
@@ -234,6 +238,22 @@ impl VoiceEventHandler for SongEndLeaver {
         } else {
             error!("not in voice channel");
         }
+
+        None
+    }
+}
+
+struct AudioTrackStart {
+    ctx: Context
+}
+
+#[async_trait]
+impl VoiceEventHandler for AudioTrackStart {
+    async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
+
+        let status = OnlineStatus::DoNotDisturb;
+        let activity = ActivityData::playing("Darude - Sandstorm");
+        self.ctx.set_presence(Some(activity), status);
 
         None
     }
