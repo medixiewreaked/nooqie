@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             framework.configure(Configuration::new()
                 .prefix(prefix));
         },
-        Err(_) => {
+        Err(_error) => {
             framework.configure(Configuration::new()
                 .prefix("!"));
         }
@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .register_songbird()
             .type_map_insert::<HttpKey>(HttpClient::new())
             .await
-            .expect("Err creating client");
+            .expect("Error creating client");
 
     tokio::spawn(async move {
         let _ = client

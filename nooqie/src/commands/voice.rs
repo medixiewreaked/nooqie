@@ -88,8 +88,8 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     let has_handler = manager.get(guild_id).is_some();
 
     if has_handler {
-        if let Err(e) = manager.remove(guild_id).await {
-            error!("failed to disconnect: {:?}", e);
+        if let Err(error) = manager.remove(guild_id).await {
+            error!("failed to disconnect: {:?}", error);
         }
         debug!("disconnected from voice channel");
     } else {
@@ -143,7 +143,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let url = match args.single::<String>() {
         Ok(url) => url,
-        Err(_) => {
+        Err(_error) => {
             error!("must provide a URL to a video or audio");
             return Ok(());
         }
@@ -151,7 +151,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let loop_amount = match args.single::<usize>() {
         Ok(loop_amount) => loop_amount,
-        Err(_) => {
+        Err(_error) => {
             debug!("not looping");
             let loop_amount = 0;
             loop_amount
@@ -186,7 +186,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
         let _ = song.add_event(
             Event::Track(TrackEvent::Play),
-    
+ 
             AudioTrackStart {
                 ctx: ctx.clone()
             }
@@ -227,8 +227,8 @@ impl VoiceEventHandler for AudioTrackEnd {
         let has_handler = self.manager.get(self.guild_id).is_some();
 
         if has_handler {
-            if let Err(e) = self.manager.remove(self.guild_id).await {
-                error!("failed to disconnect: {:?}", e);
+            if let Err(error) = self.manager.remove(self.guild_id).await {
+                error!("failed to disconnect: {:?}", error);
             }
             debug!("disconnected from voice channel");
             let status = OnlineStatus::Online;

@@ -64,12 +64,12 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
     let builder = EditMessage::new()
         .content(anwser.clone());
 
-    if let Err(why) = new_msg.edit(ctx.clone(), builder).await {
-        if why.source().unwrap().to_string() == "Unknown Message" {
+    if let Err(error) = new_msg.edit(ctx.clone(), builder).await {
+        if error.source().unwrap().to_string() == "Unknown Message" {
             debug!("original message deleted sending new message");
             new_msg.channel_id.say(&ctx.http, anwser).await?;
         }
-        error!("Error sending message: {why:?}");
+        error!("Error sending message: {error:?}");
     }
     status = OnlineStatus::Online;
     activity = ActivityData::custom("");
@@ -105,8 +105,8 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
             return Ok(air.response)
 
         },
-        Err(e) => {
-            error!("failed to connect to Ollama server: {e}");
+        Err(error) => {
+            error!("failed to connect to Ollama server: {error}");
             return Ok(String::from("I seem to have dropped my brain :brain:"))
         }
     }
