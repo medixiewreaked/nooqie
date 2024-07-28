@@ -47,6 +47,7 @@ struct AIResponse {
 }
 
 #[command]
+#[description = "queries offline local Ollama instance"]
 pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
     let mut status = OnlineStatus::DoNotDisturb;
     let mut activity = ActivityData::custom("thinking...");

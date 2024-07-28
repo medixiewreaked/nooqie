@@ -9,19 +9,36 @@ use serenity::{
     async_trait,
     framework::{
         standard::{
+            Args,
+            CommandGroup,
+            CommandResult,
             Configuration,
-            macros::group,
+            help_commands,
+            HelpOptions,
+            macros::{
+                group,
+                help
+            },
             StandardFramework
-        },
+        }
     },
-    model::gateway::Ready,
+    model::{
+        gateway::Ready,
+        prelude::{
+            Message,
+            UserId
+        }
+    },
     prelude::*
 };
 
 use songbird::SerenityInit;
 
-use std::env;
-use std::error::Error;
+use std::{
+    collections::HashSet,
+    env,
+    error::Error
+};
 
 mod commands;
 
@@ -46,6 +63,18 @@ impl EventHandler for Handler {
     }
 }
 
+#[help]
+async fn nooqie_help(
+    context: &Context,
+    msg: &Message,
+    args: Args,
+    help_options: &'static HelpOptions,
+    groups: &[&'static CommandGroup],
+    owners: HashSet<UserId>) -> CommandResult {
+        let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
+        Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     rustls::crypto::ring::default_provider().install_default().expect("Failed to install rustls crypto provider");
@@ -66,7 +95,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         | GatewayIntents::GUILD_VOICE_STATES;
 
     let framework = StandardFramework::new()
-        .group(&GENERAL_GROUP);
+        .group(&GENERAL_GROUP)
+        .help(&NOOQIE_HELP);
 
     match env::var("NOOQIE_PREFIX") {
         Ok(prefix) => {

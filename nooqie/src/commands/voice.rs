@@ -43,6 +43,7 @@ impl TypeMapKey for HttpKey {
 
 #[command]
 #[only_in(guilds)]
+#[description = "bot joins voice channel message author is currently in"]
 async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let (guild_id, channel_id) = {
         let guild = msg.guild(&ctx.cache).unwrap();
@@ -77,6 +78,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command]
 #[only_in(guilds)]
+#[description = "leaves current voice channel"]
 async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
     let guild_id = msg.guild_id.unwrap();
 
@@ -118,6 +120,7 @@ impl VoiceEventHandler for TrackErrorNotifier {
 
 #[command]
 #[only_in(guilds)]
+#[description = "plays audio track from YouTube link"]
 async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (guild_id, channel_id) = {
         let guild = msg.guild(&ctx.cache).unwrap();
@@ -261,6 +264,7 @@ impl VoiceEventHandler for AudioTrackStart {
 
 #[command]
 #[only_in(guilds)]
+#[description = "skips current audio track"]
 async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
     let guild_id = msg.guild_id.unwrap();
     let manager = songbird::get(ctx)
@@ -282,6 +286,7 @@ async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command]
 #[only_in(guilds)]
+#[description = "clears audio track queue"]
 async fn clear(ctx: &Context, msg: &Message) -> CommandResult {
     let guild_id = msg.guild_id.unwrap();
 
