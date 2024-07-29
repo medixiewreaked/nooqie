@@ -1,34 +1,18 @@
-use log::{
-    debug,
-    error
-};
+use log::{debug, error};
 
 use serenity::{
-    all::{
-        ActivityData,
-        GuildId,
-        OnlineStatus
-    },
+    all::{ActivityData, GuildId, OnlineStatus},
     async_trait,
     client::Context,
-    framework::standard::{
-        Args,
-        CommandResult,
-        macros::command
-    },
+    framework::standard::{macros::command, Args, CommandResult, HelpOptions},
     model::channel::Message,
-    prelude::TypeMapKey
+    prelude::TypeMapKey,
 };
 
 use songbird::{
-    events::{
-        Event,
-        EventContext,
-        EventHandler as VoiceEventHandler,
-        TrackEvent
-    },
+    events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent},
     input::YoutubeDl,
-    Songbird
+    Songbird,
 };
 
 use std::sync::Arc;
@@ -108,7 +92,8 @@ impl VoiceEventHandler for TrackErrorNotifier {
     async fn act(&self, ctx: &EventContext<'_>) -> Option<Event> {
         if let EventContext::Track(track_list) = ctx {
             for (state, handle) in *track_list {
-                error!("track {:?} encounted an error: {:?}",
+                error!(
+                    "track {:?} encounted an error: {:?}",
                     handle.uuid(),
                     state.playing
                 );
@@ -184,15 +169,15 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
         if loop_amount > 0 {
             let _ = song.loop_for(loop_amount);
-            debug!("looping audio track for {}", loop_amount.to_string().as_str());
+            debug!(
+                "looping audio track for {}",
+                loop_amount.to_string().as_str()
+            );
         };
 
         let _ = song.add_event(
             Event::Track(TrackEvent::Play),
- 
-            AudioTrackStart {
-                ctx: ctx.clone()
-            }
+            AudioTrackStart { ctx: ctx.clone() },
         );
 
         let _ = song.add_event(
@@ -200,8 +185,8 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             AudioTrackEnd {
                 manager,
                 guild_id,
-                ctx: ctx.clone()
-            }
+                ctx: ctx.clone(),
+            },
         );
     } else {
         debug!("no search available");
@@ -213,17 +198,16 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 struct AudioTrackEnd {
     manager: Arc<Songbird>,
     guild_id: GuildId,
-    ctx: Context
+    ctx: Context,
 }
 
 #[async_trait]
 impl VoiceEventHandler for AudioTrackEnd {
     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
-
         if let Some(handler_lock) = self.manager.get(self.guild_id) {
             let handler = handler_lock.lock().await;
             if handler.queue().len() > 0 {
-                return None
+                return None;
             }
         }
 
@@ -237,7 +221,6 @@ impl VoiceEventHandler for AudioTrackEnd {
             let status = OnlineStatus::Online;
             let activity = ActivityData::custom("");
             self.ctx.set_presence(Some(activity), status);
-
         } else {
             error!("not in voice channel");
         }
@@ -247,13 +230,12 @@ impl VoiceEventHandler for AudioTrackEnd {
 }
 
 struct AudioTrackStart {
-    ctx: Context
+    ctx: Context,
 }
 
 #[async_trait]
 impl VoiceEventHandler for AudioTrackStart {
     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
-
         let status = OnlineStatus::DoNotDisturb;
         let activity = ActivityData::playing("Darude - Sandstorm");
         self.ctx.set_presence(Some(activity), status);

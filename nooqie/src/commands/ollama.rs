@@ -1,34 +1,19 @@
-use log::{
-    debug,
-    error
-};
+use log::{debug, error};
 
 use regex::Regex;
 
-use serde::{
-    Deserialize,
-    Serialize
-};
+use serde::{Deserialize, Serialize};
 
 use serenity::{
     all::EditMessage,
     builder::CreateMessage,
-    framework::standard::{
-        macros::command,
-        CommandResult
-    },
+    framework::standard::{macros::command, CommandResult},
     gateway::ActivityData,
-    model::{
-        channel::Message,
-        user::OnlineStatus,
-    },
-    prelude::*
+    model::{channel::Message, user::OnlineStatus},
+    prelude::*,
 };
 
-use std::{
-    env,
-    error::Error
-};
+use std::{env, error::Error};
 
 #[derive(Serialize, Deserialize)]
 struct AIResponse {
@@ -43,7 +28,7 @@ struct AIResponse {
     prompt_eval_count: i64,
     prompt_eval_duration: i64,
     eval_count: i64,
-    eval_duration: i64
+    eval_duration: i64,
 }
 
 #[command]
@@ -53,17 +38,21 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
     let mut activity = ActivityData::custom("thinking...");
     ctx.set_presence(Some(activity), status);
 
-    let mut new_msg = msg.channel_id
+    let mut new_msg = msg
+        .channel_id
         .send_message(ctx.clone(), CreateMessage::new().content("..."))
         .await
         .unwrap();
 
-    let anwser = prompt_ollama(msg.content.strip_prefix("!llm ").expect("could not strip prefix '!llm '"))
-        .await
-        .unwrap();
+    let anwser = prompt_ollama(
+        msg.content
+            .strip_prefix("!llm ")
+            .expect("could not strip prefix '!llm '"),
+    )
+    .await
+    .unwrap();
 
-    let builder = EditMessage::new()
-        .content(anwser.clone());
+    let builder = EditMessage::new().content(anwser.clone());
 
     if let Err(error) = new_msg.edit(ctx.clone(), builder).await {
         if error.source().unwrap().to_string() == "Unknown Message" {
@@ -79,11 +68,9 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
-    let model = env::var("OLLAMA_MODEL")
-        .expect("'OLLAMA_MODEL' environment variable not set");
+    let model = env::var("OLLAMA_MODEL").expect("'OLLAMA_MODEL' environment variable not set");
 
-    let post_url = env::var("OLLAMA_POST_URL")
-        .expect("'OLLAMA_IP' environment variable not set");
+    let post_url = env::var("OLLAMA_POST_URL").expect("'OLLAMA_IP' environment variable not set");
 
     let client = reqwest::Client::new();
 
@@ -91,24 +78,29 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
     let prompt = json_strip_escape(&prompt);
 
     debug!("[Ollama] prompt: '{}'", prompt);
-    let response = client.post(post_url)
-        .body(format!(r##"{{"model": "{model}", "prompt": "{prompt}", "stream": false }}"##, model=model, prompt=prompt))
+    let response = client
+        .post(post_url)
+        .body(format!(
+            r##"{{"model": "{model}", "prompt": "{prompt}", "stream": false }}"##,
+            model = model,
+            prompt = prompt
+        ))
         .send()
         .await;
 
     match response {
         Ok(t) => {
-            let response_text = t.text()
+            let response_text = t
+                .text()
                 .await
                 .expect("Invalid response could not parse to text");
             let air: AIResponse = serde_json::from_str(&response_text)?;
             debug!("[Ollama] received: '{}'", air.response);
-            return Ok(air.response)
-
-        },
+            return Ok(air.response);
+        }
         Err(error) => {
             error!("failed to connect to Ollama server: {error}");
-            return Ok(String::from("I seem to have dropped my brain :brain:"))
+            return Ok(String::from("I seem to have dropped my brain :brain:"));
         }
     }
 }
