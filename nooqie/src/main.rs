@@ -27,7 +27,7 @@ use crate::commands::{ollama::*, utils::*, voice::*};
 use reqwest::Client as HttpClient;
 
 #[group]
-#[commands(ping, llm, join, leave, play, skip, clear)]
+#[commands(ping, llm, join, leave, play, skip, clear, pause)]
 struct General;
 
 struct Handler;
