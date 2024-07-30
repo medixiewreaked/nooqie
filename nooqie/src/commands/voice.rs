@@ -310,3 +310,25 @@ async fn pause(ctx: &Context, msg: &Message) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+#[only_in(guilds)]
+#[description = "resumes current audio track"]
+async fn resume(ctx: &Context, msg: &Message) -> CommandResult {
+    let guild_id = msg.guild_id.unwrap();
+    let manager = songbird::get(ctx)
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        let queue = handler.queue();
+        debug!("resuming audio track");
+        let _ = queue.resume();
+    } else {
+        error!("failed to resume audio track");
+    }
+
+    Ok(())
+}
