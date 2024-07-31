@@ -4,7 +4,7 @@ use serenity::{
     all::{ActivityData, GuildId, OnlineStatus},
     async_trait,
     client::Context,
-    framework::standard::{macros::command, Args, CommandResult, HelpOptions},
+    framework::standard::{macros::command, Args, CommandResult},
     model::channel::Message,
     prelude::TypeMapKey,
 };
