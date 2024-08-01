@@ -51,9 +51,10 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
         .expect("Songbird Voice client placed in at initialisation.")
         .clone();
 
-    debug!("joining channel");
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        debug!("joined channel: {}", current_channel);
         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
 
@@ -146,9 +147,10 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    debug!("joining channel");
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        debug!("joined channel: {}", current_channel);
         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
 
