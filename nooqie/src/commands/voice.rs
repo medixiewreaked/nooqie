@@ -1,4 +1,4 @@
-use log::{debug, error};
+use log::{debug, error, warn};
 
 use serenity::{
     all::{ActivityData, GuildId, OnlineStatus},
@@ -41,7 +41,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     let connect_to = match channel_id {
         Some(channel) => channel,
         None => {
-            error!("user not in voice channel");
+            warn!("user not in voice channel, aborting");
             return Ok(());
         }
     };
@@ -54,7 +54,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
         let current_channel = handler.current_channel().unwrap().to_string();
-        debug!("joined channel: {}", current_channel);
+        debug!("{}: joined channel", current_channel);
         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
 
@@ -72,15 +72,24 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
         .expect("Songbird Voice client placed in at initialisation.")
         .clone();
 
+    let mut current_channel = String::from("");
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        current_channel = handler.current_channel().unwrap().to_string();
+    } else {
+        warn!("can't leave not in voice channel, aborting");
+    }
+
     let has_handler = manager.get(guild_id).is_some();
 
     if has_handler {
         if let Err(error) = manager.remove(guild_id).await {
             error!("failed to disconnect: {:?}", error);
         }
-        debug!("disconnected from voice channel");
+        debug!("{}: disconnected from voice channel", current_channel);
     } else {
-        error!("not in voice channel");
+        warn!("can't leave not in voice channel, aborting");
     }
 
     Ok(())
@@ -120,7 +129,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let connect_to = match channel_id {
         Some(channel) => channel,
         None => {
-            error!("user not in voice channel");
+            warn!("user not in voice channel, aborting");
             return Ok(());
         }
     };
@@ -133,7 +142,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let url = match args.single::<String>() {
         Ok(url) => url,
         Err(_error) => {
-            error!("must provide a URL to a video or audio");
+            warn!("missing YouTube URL, aborting");
             return Ok(());
         }
     };
@@ -141,7 +150,6 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let loop_amount = match args.single::<usize>() {
         Ok(loop_amount) => loop_amount,
         Err(_error) => {
-            debug!("not looping");
             let loop_amount = 0;
             loop_amount
         }
@@ -150,7 +158,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
         let current_channel = handler.current_channel().unwrap().to_string();
-        debug!("joined channel: {}", current_channel);
+        debug!("{}: joined channel", current_channel);
         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
 
@@ -165,17 +173,19 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
         let src = YoutubeDl::new(http_client, url);
         let song = handler.enqueue_input(src.into()).await;
-        debug!("added audio to queue");
 
         if loop_amount > 0 {
             let _ = song.loop_for(loop_amount);
-            debug!(
-                "looping audio track for {}",
-                loop_amount.to_string().as_str()
-            );
         };
+
+        debug!(
+            "{}: added track to queue, looping {} times",
+            current_channel,
+            loop_amount.to_string().as_str()
+        );
 
         let _ = song.add_event(
             Event::Track(TrackEvent::Play),
@@ -191,7 +201,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             },
         );
     } else {
-        debug!("no search available");
+        warn!("no search available, aborting");
     }
 
     Ok(())
@@ -206,8 +216,12 @@ struct AudioTrackEnd {
 #[async_trait]
 impl VoiceEventHandler for AudioTrackEnd {
     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
+
+        let mut current_channel = String::from("");
+
         if let Some(handler_lock) = self.manager.get(self.guild_id) {
             let handler = handler_lock.lock().await;
+            current_channel = handler.current_channel().unwrap().to_string();
             if handler.queue().len() > 0 {
                 return None;
             }
@@ -217,14 +231,14 @@ impl VoiceEventHandler for AudioTrackEnd {
 
         if has_handler {
             if let Err(error) = self.manager.remove(self.guild_id).await {
-                error!("failed to disconnect: {:?}", error);
+                error!("{}: failed to disconnect: {:?}", current_channel, error);
             }
-            debug!("disconnected from voice channel");
+            debug!("{}: disconnected from voice channel", current_channel);
             let status = OnlineStatus::Online;
             let activity = ActivityData::custom("");
             self.ctx.set_presence(Some(activity), status);
         } else {
-            error!("not in voice channel");
+            warn!("not in voice channel, aborting");
         }
 
         None
@@ -258,11 +272,12 @@ async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
         let queue = handler.queue();
-        debug!("skipping audio track");
+        debug!("{}: skipping audio track", current_channel);
         let _ = queue.skip();
     } else {
-        error!("failed to skip audio track");
+        warn!("failed to skip audio track, aborting");
     }
 
     Ok(())
@@ -281,11 +296,12 @@ async fn clear(ctx: &Context, msg: &Message) -> CommandResult {
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
         let queue = handler.queue();
         queue.stop();
-        debug!("queue cleared");
+        debug!("{}: queue cleared", current_channel);
     } else {
-        error!("failed to clear queue");
+        warn!("failed to clear queue");
     }
 
     Ok(())
@@ -304,10 +320,11 @@ async fn pause(ctx: &Context, msg: &Message) -> CommandResult {
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
         let queue = handler.queue();
-        debug!("pausing audio track");
+        let current_channel = handler.current_channel().unwrap().to_string();
+        debug!("{}: pausing audio track", current_channel);
         let _ = queue.pause();
     } else {
-        error!("failed to pause audio track");
+        warn!("failed to pause audio track");
     }
 
     Ok(())
@@ -326,10 +343,11 @@ async fn resume(ctx: &Context, msg: &Message) -> CommandResult {
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
         let queue = handler.queue();
-        debug!("resuming audio track");
+        let current_channel = handler.current_channel().unwrap().to_string();
+        debug!("{}: resuming audio track", current_channel);
         let _ = queue.resume();
     } else {
-        error!("failed to resume audio track");
+        warn!("failed to resume audio track, aborting");
     }
 
     Ok(())
