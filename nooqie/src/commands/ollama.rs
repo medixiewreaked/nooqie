@@ -1,4 +1,4 @@
-use log::{debug, error};
+use log::{debug, error, warn};
 
 use regex::Regex;
 
@@ -38,25 +38,28 @@ pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
     let mut activity = ActivityData::custom("thinking...");
     ctx.set_presence(Some(activity), status);
 
+    let prompt = msg
+        .content
+        .strip_prefix("!llm ")
+        .expect("could not strip prefix '!llm '");
+
+    debug!("{}: prompt '{}'", msg.channel_id, prompt);
+
     let mut new_msg = msg
         .channel_id
         .send_message(ctx.clone(), CreateMessage::new().content("..."))
         .await
         .unwrap();
 
-    let anwser = prompt_ollama(
-        msg.content
-            .strip_prefix("!llm ")
-            .expect("could not strip prefix '!llm '"),
-    )
-    .await
-    .unwrap();
+    let anwser = prompt_ollama(prompt).await.unwrap();
+
+    debug!("{}: anwser '{}'", msg.channel_id, anwser);
 
     let builder = EditMessage::new().content(anwser.clone());
 
     if let Err(error) = new_msg.edit(ctx.clone(), builder).await {
         if error.source().unwrap().to_string() == "Unknown Message" {
-            debug!("original message deleted sending new message");
+            warn!("original message deleted sending new message");
             new_msg.channel_id.say(&ctx.http, anwser).await?;
         }
         error!("Error sending message: {error:?}");
@@ -77,7 +80,6 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
     let model = json_strip_escape(&model);
     let prompt = json_strip_escape(&prompt);
 
-    debug!("[Ollama] prompt: '{}'", prompt);
     let response = client
         .post(post_url)
         .body(format!(
@@ -95,11 +97,10 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
                 .await
                 .expect("Invalid response could not parse to text");
             let air: AIResponse = serde_json::from_str(&response_text)?;
-            debug!("[Ollama] received: '{}'", air.response);
             return Ok(air.response);
         }
         Err(error) => {
-            error!("failed to connect to Ollama server: {error}");
+            warn!("failed to connect to Ollama server: {error}");
             return Ok(String::from("I seem to have dropped my brain :brain:"));
         }
     }
