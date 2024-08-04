@@ -1,5 +1,7 @@
 #![allow(deprecated)]
 
+use clap::Parser;
+
 use log::{error, info};
 
 use serenity::{
@@ -25,6 +27,13 @@ mod commands;
 use crate::commands::{ollama::*, utils::*, voice::*};
 
 use reqwest::Client as HttpClient;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct CLArgs {
+    #[arg(short, long, default_value_t = 1)]
+    loglevel: usize,
+}
 
 #[group]
 #[commands(ping, llm, join, leave, play, skip, clear, pause, resume)]
@@ -54,6 +63,7 @@ async fn nooqie_help(
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let clargs = CLArgs::parse();
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("Failed to install rustls crypto provider");
