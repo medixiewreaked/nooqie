@@ -2,7 +2,9 @@
 
 use clap::Parser;
 
-use log::{error, info};
+use env_logger::Builder;
+
+use log::{error, info, LevelFilter};
 
 use serenity::{
     async_trait,
@@ -31,8 +33,8 @@ use reqwest::Client as HttpClient;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct CLArgs {
-    #[arg(short, long, default_value_t = 1)]
-    loglevel: usize,
+    #[arg(short, long, default_value = "none")]
+    loglevel: String,
 }
 
 #[group]
@@ -70,9 +72,31 @@ async fn main() -> Result<(), Box<dyn Error>> {
     dotenvy::dotenv()?;
     let token = env::var("DISCORD_TOKEN").expect("'DISCORD_TOKEN' environment variable not set");
 
-    let env = env_logger::Env::new();
+    if clargs.loglevel != "none" {
+        let mut builder = Builder::new();
 
-    env_logger::init_from_env(env);
+        match clargs.loglevel.to_lowercase().as_str() {
+            "trace" => {
+                builder.filter_module("nooqie", LevelFilter::Trace).init();
+            }
+            "debug" => {
+                builder.filter_module("nooqie", LevelFilter::Debug).init();
+            }
+            "info" => {
+                builder.filter_module("nooqie", LevelFilter::Info).init();
+            }
+            "warn" => {
+                builder.filter_module("nooqie", LevelFilter::Warn).init();
+            }
+            "error" => {
+                builder.filter_module("nooqie", LevelFilter::Error).init();
+            }
+            &_ => {}
+        }
+    } else {
+        let env = env_logger::Env::new();
+        env_logger::init_from_env(env);
+    }
 
     info!("Starting...");
 
