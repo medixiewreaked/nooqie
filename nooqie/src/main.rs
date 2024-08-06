@@ -1,6 +1,6 @@
 #![allow(deprecated)]
 
-use clap::Parser;
+use clap::{crate_description,Parser};
 
 use env_logger::Builder;
 
@@ -31,7 +31,8 @@ use crate::commands::{ollama::*, utils::*, voice::*};
 use reqwest::Client as HttpClient;
 
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(about=crate_description!())]
+#[command(version, long_about = None)]
 struct CLArgs {
     #[arg(short, long, default_value = "none")]
     loglevel: String,
