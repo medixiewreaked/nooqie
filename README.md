@@ -22,6 +22,8 @@ cd ./nooqie
 cargo run
 ```
 
+![example](https://github.com/medixiewreaked/nooqie/blob/main/tapes/example.gif?raw=true)
+
 ### Example:
 ```
 !llm Who is Berry McCaulkiner, and why is he contacting my wife?
