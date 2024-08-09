@@ -23,12 +23,12 @@ struct AIResponse {
     done: bool,
     done_reason: String,
     context: Vec<i64>,
-    total_duration: i64,
-    load_duration: i64,
-    prompt_eval_count: i64,
-    prompt_eval_duration: i64,
-    eval_count: i64,
-    eval_duration: i64,
+    total_duration: u64,
+    load_duration: u64,
+    prompt_eval_count: u64,
+    prompt_eval_duration: u64,
+    eval_count: u64,
+    eval_duration: u64,
 }
 
 #[command]
