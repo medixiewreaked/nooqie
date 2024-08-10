@@ -22,7 +22,7 @@ struct AIResponse {
     response: String,
     done: bool,
     done_reason: String,
-    context: Vec<i64>,
+    context: Vec<u64>,
     total_duration: u64,
     load_duration: u64,
     prompt_eval_count: u64,
