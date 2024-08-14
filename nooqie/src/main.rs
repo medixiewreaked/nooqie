@@ -37,12 +37,7 @@ use crate::commands::{ollama::*, utils::*, voice::*};
 
 use reqwest::Client as HttpClient;
 
-type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, Data, Error>;
-
-pub struct Data {
-    votes: Mutex<HashMap<String, u32>>,
-}
+use nooqie::{Context, Data, Error};
 
 #[derive(Parser, Debug)]
 #[command(about=crate_description!())]
@@ -80,19 +75,6 @@ async fn event_handler(
     }
     Ok(())
 }
-
-// #[help]
-// async fn nooqie_help(
-//     context: &Context,
-//     msg: &Message,
-//     args: Args,
-//     help_options: &'static HelpOptions,
-//     groups: &[&'static CommandGroup],
-//     owners: HashSet<UserId>,
-// ) -> CommandResult {
-//     let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
-//     Ok(())
-// }
 
 #[tokio::main]
 async fn main() {
@@ -143,7 +125,7 @@ async fn main() {
     };
 
     let options = poise::FrameworkOptions {
-        commands: vec![],
+        commands: vec![help()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some(prefix.into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -173,9 +155,7 @@ async fn main() {
         .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {
-                    votes: Mutex::new(HashMap::new()),
-                })
+                Ok(Data {})
             })
         })
         .options(options)
