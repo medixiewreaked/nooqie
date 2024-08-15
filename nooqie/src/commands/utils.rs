@@ -1,16 +1,16 @@
 use crate::{Context, Error};
-// use serenity::{
-//     framework::standard::{macros::command, CommandResult},
-//     model::prelude::*,
-//     prelude::*,
-// };
-//
-// #[command]
-// #[description = "send ping, get pong"]
-// pub async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-//     msg.channel_id.say(&ctx.http, "pong!").await?;
-//     Ok(())
-// }
+use poise::serenity_prelude::standard::CommandResult;
+
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn ping(
+    ctx: Context<'_>,
+    #[description = "send ping, get pong"]
+    #[autocomplete = "poise::builtins::autocomplete_command"]
+    _command: Option<String>,
+) -> CommandResult {
+    ctx.say("pong!").await?;
+    Ok(())
+}
 
 #[poise::command(prefix_command, track_edits, slash_command)]
 pub async fn help(
