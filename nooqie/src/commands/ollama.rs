@@ -1,19 +1,19 @@
 use log::{debug, error, warn};
 
+use poise::serenity_prelude::standard::CommandResult;
+use poise::serenity_prelude::ActivityData;
+use poise::serenity_prelude::CreateMessage;
+use poise::serenity_prelude::EditMessage;
+use poise::serenity_prelude::OnlineStatus;
+use poise::CreateReply;
+
 use regex::Regex;
 
 use serde::{Deserialize, Serialize};
 
-use serenity::{
-    all::EditMessage,
-    builder::CreateMessage,
-    framework::standard::{macros::command, CommandResult},
-    gateway::ActivityData,
-    model::{channel::Message, user::OnlineStatus},
-    prelude::*,
-};
+use std::env;
 
-use std::{env, error::Error};
+use crate::{Context, Error};
 
 #[derive(Serialize, Deserialize)]
 struct AIResponse {
@@ -31,46 +31,45 @@ struct AIResponse {
     eval_duration: u64,
 }
 
-#[command]
-#[description = "queries offline local Ollama instance"]
-pub async fn llm(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut status = OnlineStatus::DoNotDisturb;
-    let mut activity = ActivityData::custom("thinking...");
-    ctx.set_presence(Some(activity), status);
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn llm(
+    ctx: Context<'_>,
+    #[description = "queries offline local Ollama instance"]
+    #[autocomplete = "poise::builtins::autocomplete_command"]
+    #[rest]
+    msg: Option<String>,
+) -> CommandResult {
+    //     let mut status = OnlineStatus::DoNotDisturb;
+    //     let mut activity = ActivityData::custom("thinking...");
+    //     ctx.set_presence(Some(activity), status);
 
-    let prompt = msg
-        .content
-        .strip_prefix("!llm ")
-        .expect("could not strip prefix '!llm '");
+    let prompt = &msg.unwrap();
 
-    debug!("{}: prompt '{}'", msg.channel_id, prompt);
+    debug!("{}: prompt '{}'", ctx.channel_id(), prompt);
 
-    let mut new_msg = msg
-        .channel_id
-        .send_message(ctx.clone(), CreateMessage::new().content("..."))
-        .await
-        .unwrap();
+    let mut new_msg = ctx.say("...").await.expect("");
 
     let anwser = prompt_ollama(prompt).await.unwrap();
 
-    debug!("{}: anwser '{}'", msg.channel_id, anwser);
+    debug!("{}: anwser '{}'", ctx.channel_id(), anwser);
 
-    let builder = EditMessage::new().content(anwser.clone());
+    // let builder = EditMessage::new().content(anwser.clone());
+    let builder = CreateReply::default().content(anwser.clone());
 
-    if let Err(error) = new_msg.edit(ctx.clone(), builder).await {
-        if error.source().unwrap().to_string() == "Unknown Message" {
+    if let Err(error) = new_msg.edit(ctx, builder).await {
+        if error.to_string() == "Unknown Message" {
             warn!("original message deleted sending new message");
-            new_msg.channel_id.say(&ctx.http, anwser).await?;
+            ctx.say(anwser).await?;
         }
         error!("Error sending message: {error:?}");
     }
-    status = OnlineStatus::Online;
-    activity = ActivityData::custom("");
-    ctx.set_presence(Some(activity), status);
+    //     status = OnlineStatus::Online;
+    //     activity = ActivityData::custom("");
+    //     ctx.set_presence(Some(activity), status);
     Ok(())
 }
 
-pub async fn prompt_ollama(prompt: &str) -> Result<String, Box<dyn Error>> {
+pub async fn prompt_ollama(prompt: &str) -> Result<String, Error> {
     let model = env::var("OLLAMA_MODEL").expect("'OLLAMA_MODEL' environment variable not set");
 
     let post_url = env::var("OLLAMA_POST_URL").expect("'OLLAMA_IP' environment variable not set");
