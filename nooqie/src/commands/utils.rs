@@ -1,7 +1,7 @@
 use crate::{Context, Error};
 use poise::serenity_prelude::standard::CommandResult;
 
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
 pub async fn ping(
     ctx: Context<'_>,
     #[description = "send ping, get pong"]
@@ -12,7 +12,7 @@ pub async fn ping(
     Ok(())
 }
 
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
 pub async fn help(
     ctx: Context<'_>,
     #[description = "Show help"]
