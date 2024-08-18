@@ -125,7 +125,7 @@ async fn main() {
     };
 
     let options = poise::FrameworkOptions {
-        commands: vec![help(), ping(), llm()],
+        commands: vec![help(), ping(), llm(), join()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some(prefix.into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
