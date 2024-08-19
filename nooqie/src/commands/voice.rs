@@ -64,40 +64,42 @@ pub async fn join(ctx: Context<'_>) -> CommandResult {
     Ok(())
 }
 
-// #[command]
-// #[only_in(guilds)]
 // #[description = "leaves current voice channel"]
-// async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
-//     let guild_id = msg.guild_id.unwrap();
-//
-//     let manager = songbird::get(ctx)
-//         .await
-//         .expect("Songbird Voice client placed in at initialisation.")
-//         .clone();
-//
-//     let mut current_channel = String::from("");
-//
-//     if let Some(handler_lock) = manager.get(guild_id) {
-//         let handler = handler_lock.lock().await;
-//         current_channel = handler.current_channel().unwrap().to_string();
-//     } else {
-//         warn!("can't leave not in voice channel, aborting");
-//     }
-//
-//     let has_handler = manager.get(guild_id).is_some();
-//
-//     if has_handler {
-//         if let Err(error) = manager.remove(guild_id).await {
-//             error!("failed to disconnect: {:?}", error);
-//         }
-//         debug!("{}: disconnected from voice channel", current_channel);
-//     } else {
-//         warn!("can't leave not in voice channel, aborting");
-//     }
-//
-//     Ok(())
-// }
-//
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn leave(ctx: Context<'_>) -> CommandResult {
+    let guild_id = {
+        let guild = ctx.guild().unwrap();
+        guild.id
+    };
+
+    let manager = songbird::get(ctx.as_ref())
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    let mut current_channel = String::from("");
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        current_channel = handler.current_channel().unwrap().to_string();
+    } else {
+        warn!("can't leave not in voice channel, aborting");
+    }
+
+    let has_handler = manager.get(guild_id).is_some();
+
+    if has_handler {
+        if let Err(error) = manager.remove(guild_id).await {
+            error!("failed to disconnect: {:?}", error);
+        }
+        debug!("{}: disconnected from voice channel", current_channel);
+    } else {
+        warn!("can't leave not in voice channel, aborting");
+    }
+
+    Ok(())
+}
+
 // struct TrackErrorNotifier;
 //
 // #[async_trait]
