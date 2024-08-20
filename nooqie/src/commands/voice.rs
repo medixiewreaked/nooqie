@@ -2,6 +2,7 @@ use crate::{Context, Error};
 use poise::serenity_prelude::prelude::TypeMapKey;
 use poise::serenity_prelude::standard::CommandResult;
 use poise::serenity_prelude::Message;
+use poise::async_trait;
 
 use log::{debug, error, warn};
 
@@ -100,58 +101,61 @@ pub async fn leave(ctx: Context<'_>) -> CommandResult {
     Ok(())
 }
 
-// struct TrackErrorNotifier;
-//
-// #[async_trait]
-// impl VoiceEventHandler for TrackErrorNotifier {
-//     async fn act(&self, ctx: &EventContext<'_>) -> Option<Event> {
-//         if let EventContext::Track(track_list) = ctx {
-//             for (state, handle) in *track_list {
-//                 error!(
-//                     "track {:?} encounted an error: {:?}",
-//                     handle.uuid(),
-//                     state.playing
-//                 );
-//             }
-//         }
-//         None
-//     }
-// }
-//
-// #[command]
-// #[only_in(guilds)]
+struct TrackErrorNotifier;
+
+#[async_trait]
+impl VoiceEventHandler for TrackErrorNotifier {
+    async fn act(&self, ctx: &EventContext<'_>) -> Option<Event> {
+        if let EventContext::Track(track_list) = ctx {
+            for (state, handle) in *track_list {
+                error!(
+                    "track {:?} encounted an error: {:?}",
+                    handle.uuid(),
+                    state.playing
+                );
+            }
+        }
+        None
+    }
+}
+
 // #[description = "plays audio track from YouTube link"]
 // async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-//     let (guild_id, channel_id) = {
-//         let guild = msg.guild(&ctx.cache).unwrap();
-//         let channel_id = guild
-//             .voice_states
-//             .get(&msg.author.id)
-//             .and_then(|voice_states| voice_states.channel_id);
-//         (guild.id, channel_id)
-//     };
-//
-//     let connect_to = match channel_id {
-//         Some(channel) => channel,
-//         None => {
-//             warn!("user not in voice channel, aborting");
-//             return Ok(());
-//         }
-//     };
-//
-//     let manager = songbird::get(&ctx)
-//         .await
-//         .expect("Songbird Voice client placed in at initialisation.")
-//         .clone();
-//
-//     let url = match args.single::<String>() {
-//         Ok(url) => url,
-//         Err(_error) => {
-//             warn!("missing YouTube URL, aborting");
-//             return Ok(());
-//         }
-//     };
-//
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
+    let (guild_id, channel_id) = {
+        let guild = ctx.guild().unwrap();
+        let channel_id = guild
+            .voice_states
+            .get(ctx.author().id.as_ref())
+            .and_then(|voice_states| voice_states.channel_id);
+        (guild.id, channel_id)
+    };
+
+    let connect_to = match channel_id {
+        Some(channel) => channel,
+        None => {
+            warn!("user not in voice channel, aborting");
+            return Ok(());
+        }
+    };
+
+    let manager = songbird::get(ctx.as_ref())
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    let url = match msg {
+        ref String => {
+            warn!("{}", msg.clone().unwrap());
+            msg.unwrap()
+        },
+        None => {
+            warn!("missing YouTube URL, aborting");
+            return Ok(());
+        }
+    };
+
 //     let loop_amount = match args.single::<usize>() {
 //         Ok(loop_amount) => loop_amount,
 //         Err(_error) => {
@@ -159,44 +163,42 @@ pub async fn leave(ctx: Context<'_>) -> CommandResult {
 //             loop_amount
 //         }
 //     };
-//
-//     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
-//         let mut handler = handler_lock.lock().await;
-//         let current_channel = handler.current_channel().unwrap().to_string();
-//         debug!("{}: joined channel", current_channel);
-//         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
-//     }
-//
-//     let guild_id = msg.guild_id.unwrap();
-//
-//     let http_client = {
-//         let data = ctx.data.read().await;
-//         data.get::<HttpKey>()
-//             .cloned()
-//             .expect("Guaranteed to exist in the typemap.")
-//     };
-//
-//     if let Some(handler_lock) = manager.get(guild_id) {
-//         let mut handler = handler_lock.lock().await;
-//         let current_channel = handler.current_channel().unwrap().to_string();
-//         let src = YoutubeDl::new(http_client, url);
-//         let song = handler.enqueue_input(src.into()).await;
-//
+
+    if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
+        let mut handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        debug!("{}: joined channel", current_channel);
+        handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
+    }
+
+    let http_client = {
+        let data = ctx.serenity_context().data.read().await;
+        data.get::<HttpKey>()
+            .cloned()
+            .expect("Guaranteed to exist in the typemap.")
+    };
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let mut handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        let src = YoutubeDl::new(http_client, url);
+        let song = handler.enqueue_input(src.into()).await;
+
 //         if loop_amount > 0 {
 //             let _ = song.loop_for(loop_amount);
 //         };
-//
+
 //         debug!(
 //             "{}: added track to queue, looping {} times",
 //             current_channel,
 //             loop_amount.to_string().as_str()
 //         );
-//
+
 //         let _ = song.add_event(
 //             Event::Track(TrackEvent::Play),
 //             AudioTrackStart { ctx: ctx.clone() },
 //         );
-//
+// 
 //         let _ = song.add_event(
 //             Event::Track(TrackEvent::End),
 //             AudioTrackEnd {
@@ -205,12 +207,13 @@ pub async fn leave(ctx: Context<'_>) -> CommandResult {
 //                 ctx: ctx.clone(),
 //             },
 //         );
-//     } else {
-//         warn!("no search available, aborting");
-//     }
-//
-//     Ok(())
-// }
+
+    } else {
+        warn!("no search available, aborting");
+    }
+
+    Ok(())
+}
 //
 // struct AudioTrackEnd {
 //     manager: Arc<Songbird>,
