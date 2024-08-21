@@ -1,8 +1,8 @@
 use crate::{Context, Error};
+use poise::async_trait;
 use poise::serenity_prelude::prelude::TypeMapKey;
 use poise::serenity_prelude::standard::CommandResult;
 use poise::serenity_prelude::Message;
-use poise::async_trait;
 
 use log::{debug, error, warn};
 
@@ -146,23 +146,20 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
         .clone();
 
     let url = match msg {
-        ref String => {
-            warn!("{}", msg.clone().unwrap());
-            msg.unwrap()
-        },
+        ref String => msg.unwrap(),
         None => {
             warn!("missing YouTube URL, aborting");
             return Ok(());
         }
     };
 
-//     let loop_amount = match args.single::<usize>() {
-//         Ok(loop_amount) => loop_amount,
-//         Err(_error) => {
-//             let loop_amount = 0;
-//             loop_amount
-//         }
-//     };
+    //     let loop_amount = match args.single::<usize>() {
+    //         Ok(loop_amount) => loop_amount,
+    //         Err(_error) => {
+    //             let loop_amount = 0;
+    //             loop_amount
+    //         }
+    //     };
 
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
@@ -184,30 +181,29 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
         let src = YoutubeDl::new(http_client, url);
         let song = handler.enqueue_input(src.into()).await;
 
-//         if loop_amount > 0 {
-//             let _ = song.loop_for(loop_amount);
-//         };
+    //         if loop_amount > 0 {
+    //             let _ = song.loop_for(loop_amount);
+    //         };
 
-//         debug!(
-//             "{}: added track to queue, looping {} times",
-//             current_channel,
-//             loop_amount.to_string().as_str()
-//         );
+    //         debug!(
+    //             "{}: added track to queue, looping {} times",
+    //             current_channel,
+    //             loop_amount.to_string().as_str()
+    //         );
 
-//         let _ = song.add_event(
-//             Event::Track(TrackEvent::Play),
-//             AudioTrackStart { ctx: ctx.clone() },
-//         );
-// 
-//         let _ = song.add_event(
-//             Event::Track(TrackEvent::End),
-//             AudioTrackEnd {
-//                 manager,
-//                 guild_id,
-//                 ctx: ctx.clone(),
-//             },
-//         );
-
+    //         let _ = song.add_event(
+    //             Event::Track(TrackEvent::Play),
+    //             AudioTrackStart { ctx: ctx.clone() },
+    //         );
+    //
+    //         let _ = song.add_event(
+    //             Event::Track(TrackEvent::End),
+    //             AudioTrackEnd {
+    //                 manager,
+    //                 guild_id,
+    //                 ctx: ctx.clone(),
+    //             },
+    //         );
     } else {
         warn!("no search available, aborting");
     }
@@ -314,29 +310,32 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
 //     Ok(())
 // }
 //
-// #[command]
-// #[only_in(guilds)]
 // #[description = "pauses current audio track"]
-// async fn pause(ctx: &Context, msg: &Message) -> CommandResult {
-//     let guild_id = msg.guild_id.unwrap();
-//     let manager = songbird::get(ctx)
-//         .await
-//         .expect("Songbird Voice client placed in at initialisation.")
-//         .clone();
-//
-//     if let Some(handler_lock) = manager.get(guild_id) {
-//         let handler = handler_lock.lock().await;
-//         let queue = handler.queue();
-//         let current_channel = handler.current_channel().unwrap().to_string();
-//         debug!("{}: pausing audio track", current_channel);
-//         let _ = queue.pause();
-//     } else {
-//         warn!("failed to pause audio track");
-//     }
-//
-//     Ok(())
-// }
-//
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn pause(ctx: Context<'_>) -> CommandResult {
+    let guild_id = {
+        let guild = ctx.guild().unwrap();
+        guild.id
+    };
+
+    let manager = songbird::get(ctx.as_ref())
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        let queue = handler.queue();
+        debug!("{}: pausing audio track", current_channel);
+        let _ = queue.pause();
+    } else {
+        warn!("failed to pause audio track");
+    }
+
+    Ok(())
+}
+
 // #[command]
 // #[only_in(guilds)]
 // #[description = "resumes current audio track"]
