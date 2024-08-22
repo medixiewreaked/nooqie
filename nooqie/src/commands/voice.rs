@@ -336,25 +336,28 @@ pub async fn pause(ctx: Context<'_>) -> CommandResult {
     Ok(())
 }
 
-// #[command]
-// #[only_in(guilds)]
 // #[description = "resumes current audio track"]
-// async fn resume(ctx: &Context, msg: &Message) -> CommandResult {
-//     let guild_id = msg.guild_id.unwrap();
-//     let manager = songbird::get(ctx)
-//         .await
-//         .expect("Songbird Voice client placed in at initialisation.")
-//         .clone();
-//
-//     if let Some(handler_lock) = manager.get(guild_id) {
-//         let handler = handler_lock.lock().await;
-//         let queue = handler.queue();
-//         let current_channel = handler.current_channel().unwrap().to_string();
-//         debug!("{}: resuming audio track", current_channel);
-//         let _ = queue.resume();
-//     } else {
-//         warn!("failed to resume audio track, aborting");
-//     }
-//
-//     Ok(())
-// }
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn resume(ctx: Context<'_>) -> CommandResult {
+    let guild_id = {
+        let guild = ctx.guild().unwrap();
+        guild.id
+    };
+
+    let manager = songbird::get(ctx.as_ref())
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        let queue = handler.queue();
+        debug!("{}: resuming audio track", current_channel);
+        let _ = queue.resume();
+    } else {
+        warn!("failed to resume audio track, aborting");
+    }
+
+    Ok(())
+}
