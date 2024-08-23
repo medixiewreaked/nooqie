@@ -262,29 +262,32 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
 //         None
 //     }
 // }
-//
-// #[command]
-// #[only_in(guilds)]
+
 // #[description = "skips current audio track"]
-// async fn skip(ctx: &Context, msg: &Message) -> CommandResult {
-//     let guild_id = msg.guild_id.unwrap();
-//     let manager = songbird::get(ctx)
-//         .await
-//         .expect("Songbird Voice client placed in at initialisation.")
-//         .clone();
-//
-//     if let Some(handler_lock) = manager.get(guild_id) {
-//         let handler = handler_lock.lock().await;
-//         let current_channel = handler.current_channel().unwrap().to_string();
-//         let queue = handler.queue();
-//         debug!("{}: skipping audio track", current_channel);
-//         let _ = queue.skip();
-//     } else {
-//         warn!("failed to skip audio track, aborting");
-//     }
-//
-//     Ok(())
-// }
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn skip(ctx: Context<'_>) -> CommandResult {
+    let guild_id = {
+        let guild = ctx.guild().unwrap();
+        guild.id
+    };
+
+    let manager = songbird::get(ctx.as_ref())
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        let current_channel = handler.current_channel().unwrap().to_string();
+        let queue = handler.queue();
+        debug!("{}: skipping audio track", current_channel);
+        let _ = queue.skip();
+    } else {
+        warn!("failed to skip audio track, aborting");
+    }
+
+    Ok(())
+}
 //
 // #[command]
 // #[only_in(guilds)]
