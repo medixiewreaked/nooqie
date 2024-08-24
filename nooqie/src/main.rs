@@ -135,6 +135,7 @@ async fn main() {
             pause(),
             resume(),
             skip(),
+            clear(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some(prefix.into()),
