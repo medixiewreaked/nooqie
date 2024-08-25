@@ -31,7 +31,7 @@ impl TypeMapKey for HttpKey {
     type Value = HttpClient;
 }
 
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn join(ctx: Context<'_>) -> CommandResult {
     let (guild_id, channel_id) = {
         let guild = ctx.guild().unwrap();
@@ -66,7 +66,7 @@ pub async fn join(ctx: Context<'_>) -> CommandResult {
 }
 
 // #[description = "leaves current voice channel"]
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn leave(ctx: Context<'_>) -> CommandResult {
     let guild_id = {
         let guild = ctx.guild().unwrap();
@@ -121,7 +121,7 @@ impl VoiceEventHandler for TrackErrorNotifier {
 
 // #[description = "plays audio track from YouTube link"]
 // async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
     let (guild_id, channel_id) = {
         let guild = ctx.guild().unwrap();
@@ -264,7 +264,7 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
 // }
 
 // #[description = "skips current audio track"]
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn skip(ctx: Context<'_>) -> CommandResult {
     let guild_id = {
         let guild = ctx.guild().unwrap();
@@ -290,7 +290,7 @@ pub async fn skip(ctx: Context<'_>) -> CommandResult {
 }
 
 // #[description = "clears audio track queue"]
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn clear(ctx: Context<'_>) -> CommandResult {
     let guild_id = {
         let guild = ctx.guild().unwrap();
@@ -316,7 +316,7 @@ pub async fn clear(ctx: Context<'_>) -> CommandResult {
 }
 
 // #[description = "pauses current audio track"]
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn pause(ctx: Context<'_>) -> CommandResult {
     let guild_id = {
         let guild = ctx.guild().unwrap();
@@ -342,7 +342,7 @@ pub async fn pause(ctx: Context<'_>) -> CommandResult {
 }
 
 // #[description = "resumes current audio track"]
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn resume(ctx: Context<'_>) -> CommandResult {
     let guild_id = {
         let guild = ctx.guild().unwrap();
