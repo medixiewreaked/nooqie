@@ -6,15 +6,6 @@ use poise::serenity_prelude::Message;
 
 use log::{debug, error, warn};
 
-// use serenity::{
-//     all::{ActivityData, GuildId, OnlineStatus},
-//     async_trait,
-//     client::Context,
-//     framework::standard::{macros::command, Args, CommandResult},
-//     model::channel::Message,
-//     prelude::TypeMapKey,
-// };
-
 use songbird::{
     events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent},
     input::YoutubeDl,
