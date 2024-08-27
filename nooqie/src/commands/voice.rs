@@ -1,8 +1,9 @@
 use crate::{Context, Error};
-use poise::async_trait;
-use poise::serenity_prelude::prelude::TypeMapKey;
-use poise::serenity_prelude::standard::CommandResult;
-use poise::serenity_prelude::Message;
+
+use poise::{
+    async_trait,
+    serenity_prelude::{prelude::TypeMapKey, standard::CommandResult, Message},
+};
 
 use log::{debug, error, warn};
 
