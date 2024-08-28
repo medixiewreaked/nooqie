@@ -2,12 +2,11 @@ use log::{debug, error, warn};
 
 use poise::serenity_prelude::standard::CommandResult;
 use poise::serenity_prelude::ActivityData;
-use poise::serenity_prelude::CreateMessage;
-use poise::serenity_prelude::EditMessage;
 use poise::serenity_prelude::OnlineStatus;
 use poise::CreateReply;
 
 use regex::Regex;
+use reqwest::Client;
 
 use serde::{Deserialize, Serialize};
 
@@ -39,15 +38,16 @@ pub async fn llm(
     #[rest]
     msg: Option<String>,
 ) -> CommandResult {
-    //     let mut status = OnlineStatus::DoNotDisturb;
-    //     let mut activity = ActivityData::custom("thinking...");
-    //     ctx.set_presence(Some(activity), status);
+    let ser_ctx: &poise::serenity_prelude::Context = ctx.serenity_context();
+    let mut status: OnlineStatus = OnlineStatus::DoNotDisturb;
+    let mut activity: ActivityData = ActivityData::custom("thinking...");
+    ctx.serenity_context().set_presence(Some(activity), status);
 
-    let prompt = &msg.unwrap();
+    let prompt: &str = &msg.unwrap();
 
     debug!("{}: prompt '{}'", ctx.channel_id(), prompt);
 
-    let mut new_msg = ctx.say("...").await.expect("");
+    let new_msg = ctx.say("...").await.expect("");
 
     let anwser = prompt_ollama(prompt).await.unwrap();
 
@@ -63,9 +63,9 @@ pub async fn llm(
         }
         error!("Error sending message: {error:?}");
     }
-    //     status = OnlineStatus::Online;
-    //     activity = ActivityData::custom("");
-    //     ctx.set_presence(Some(activity), status);
+    status = OnlineStatus::Online;
+    activity = ActivityData::custom("");
+    ser_ctx.set_presence(Some(activity), status);
     Ok(())
 }
 
@@ -74,17 +74,17 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Error> {
 
     let post_url = env::var("OLLAMA_POST_URL").expect("'OLLAMA_IP' environment variable not set");
 
-    let client = reqwest::Client::new();
+    let client: Client = Client::new();
 
     let model = json_strip_escape(&model);
-    let prompt = json_strip_escape(&prompt);
+    let prompt_fmt = json_strip_escape(&prompt);
 
     let response = client
         .post(post_url)
         .body(format!(
-            r##"{{"model": "{model}", "prompt": "{prompt}", "stream": false }}"##,
+            r##"{{"model": "{model}", "prompt": "{prompt_fmt}", "stream": false }}"##,
             model = model,
-            prompt = prompt
+            prompt_fmt = prompt_fmt
         ))
         .send()
         .await;
@@ -96,11 +96,11 @@ pub async fn prompt_ollama(prompt: &str) -> Result<String, Error> {
                 .await
                 .expect("Invalid response could not parse to text");
             let air: AIResponse = serde_json::from_str(&response_text)?;
-            return Ok(air.response);
+            Ok(air.response)
         }
         Err(error) => {
             warn!("failed to connect to Ollama server: {error}");
-            return Ok(String::from("I seem to have dropped my brain :brain:"));
+            Ok(String::from("I seem to have dropped my brain :brain:"))
         }
     }
 }
