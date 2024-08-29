@@ -2,7 +2,9 @@ use crate::{Context, Error};
 
 use poise::{
     async_trait,
-    serenity_prelude::{prelude::TypeMapKey, standard::CommandResult, Message},
+    serenity_prelude::{
+        prelude::TypeMapKey, standard::CommandResult, ActivityData, Message, OnlineStatus,
+    },
 };
 
 use log::{debug, error, warn};
@@ -172,6 +174,11 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
         let current_channel = handler.current_channel().unwrap().to_string();
         let src = YoutubeDl::new(http_client, url);
         let song = handler.enqueue_input(src.into()).await;
+
+        let ser_ctx: &poise::serenity_prelude::Context = ctx.serenity_context();
+        let mut status: OnlineStatus = OnlineStatus::DoNotDisturb;
+        let mut activity: ActivityData = ActivityData::custom("Darude - Sandstorm");
+        ctx.serenity_context().set_presence(Some(activity), status);
 
     //         if loop_amount > 0 {
     //             let _ = song.loop_for(loop_amount);
