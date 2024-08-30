@@ -140,7 +140,7 @@ pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
         .clone();
 
     let url = match msg {
-        ref String => msg.unwrap(),
+        Some(msg) => msg,
         None => {
             warn!("missing YouTube URL, aborting");
             return Ok(());
