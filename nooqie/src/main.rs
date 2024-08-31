@@ -6,30 +6,11 @@ use env_logger::Builder;
 
 use log::{error, info, LevelFilter};
 
-//use serenity::{
-//    async_trait,
-//    framework::standard::{
-//        help_commands,
-//        macros::{group, help},
-//        Args, CommandGroup, CommandResult, Configuration, HelpOptions, StandardFramework,
-//    },
-//    model::{
-//        gateway::Ready,
-//        prelude::{Message, UserId},
-//    },
-//    prelude::*,
-//};
 use poise::serenity_prelude as serenity;
 
 use songbird::SerenityInit;
 
-use std::{
-    collections::{HashMap, HashSet},
-    env,
-    env::var,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::{env, sync::Arc, time::Duration};
 
 mod commands;
 
