@@ -2,9 +2,7 @@ use crate::{Context, Error};
 
 use poise::{
     async_trait,
-    serenity_prelude::{
-        prelude::TypeMapKey, standard::CommandResult, ActivityData, Message, OnlineStatus,
-    },
+    serenity_prelude::{prelude::TypeMapKey, standard::CommandResult, ActivityData, OnlineStatus},
 };
 
 use log::{debug, error, warn};
@@ -12,10 +10,7 @@ use log::{debug, error, warn};
 use songbird::{
     events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent},
     input::YoutubeDl,
-    Songbird,
 };
-
-use std::sync::Arc;
 
 use reqwest::Client as HttpClient;
 
