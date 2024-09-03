@@ -13,3 +13,10 @@ RUN adduser \
     "nooqie"
 
 RUN cargo build --target x86_64-unknown-linux-musl --release
+
+FROM alpine:latest AS actual
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build --chown=nooqie:nooqie ./target/x86_64-unknown-linux-musl/release/nooqie /app/nooqie
+USER nooqie:nooqie
+ENTRYPOINT ["./app/nooqie"]
