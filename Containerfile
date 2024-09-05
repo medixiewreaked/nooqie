@@ -22,4 +22,5 @@ USER nooqie:nooqie
 ENV DISCORD_TOKEN YOURTOKENHERE
 ENV OLLAMA_POST_URL "http://0.0.0.0/api/generate"
 ENV OLLAMA_MODEL "llama2-uncensored"
+ENV RUST_LOG none,nooqie=debug
 ENTRYPOINT ["./app/nooqie"]
