@@ -1,4 +1,4 @@
-use crate::{Context, Error};
+use crate::Context;
 
 use poise::{
     async_trait,
@@ -48,7 +48,7 @@ pub async fn join(ctx: Context<'_>) -> CommandResult {
         let mut handler = handler_lock.lock().await;
         let current_channel = handler.current_channel().unwrap().to_string();
         debug!("{}: joined channel", current_channel);
-        // handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
+        handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
 
     Ok(())
