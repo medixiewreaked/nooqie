@@ -111,7 +111,10 @@ impl VoiceEventHandler for TrackErrorNotifier {
 // #[description = "plays audio track from YouTube link"]
 // async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
-pub async fn play(ctx: Context<'_>, msg: Option<String>) -> CommandResult {
+pub async fn play(
+    ctx: Context<'_>,
+    #[description = "Youtube URL"] msg: Option<String>,
+) -> CommandResult {
     let (guild_id, channel_id) = {
         let guild = ctx.guild().unwrap();
         let channel_id = guild
