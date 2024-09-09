@@ -5,7 +5,7 @@ use poise::{
     serenity_prelude::{prelude::TypeMapKey, standard::CommandResult, ActivityData, OnlineStatus},
 };
 
-use log::{debug, error, warn};
+use log::{debug, error, info, warn};
 
 use songbird::{
     events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent},
@@ -177,6 +177,8 @@ pub async fn play(
         let mut status: OnlineStatus = OnlineStatus::DoNotDisturb;
         let mut activity: ActivityData = ActivityData::custom("Darude - Sandstorm");
         ctx.serenity_context().set_presence(Some(activity), status);
+
+        info!("playing in {}", current_channel);
 
     //         if loop_amount > 0 {
     //             let _ = song.loop_for(loop_amount);
