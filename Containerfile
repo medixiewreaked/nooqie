@@ -18,6 +18,7 @@ FROM alpine:latest AS actual
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 COPY --from=build --chown=nooqie:nooqie ./target/x86_64-unknown-linux-musl/release/nooqie /app/nooqie
+RUN apk add yt-dlp
 USER nooqie:nooqie
 ENV DISCORD_TOKEN YOURTOKENHERE
 ENV OLLAMA_POST_URL "http://0.0.0.0/api/generate"
