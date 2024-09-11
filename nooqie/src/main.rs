@@ -1,12 +1,11 @@
-#![allow(deprecated)]
-
 use clap::{crate_description, Parser};
 
-use env_logger::Builder;
+use env_logger::{Builder, Env};
 
 use log::{error, info, LevelFilter};
 
 use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::{Client, GatewayIntents};
 
 use songbird::SerenityInit;
 
@@ -52,6 +51,9 @@ async fn event_handler(
         serenity::FullEvent::Ready { data_about_bot, .. } => {
             info!("{} is connected", data_about_bot.user.name);
         }
+        serenity::FullEvent::ShardsReady { total_shards } => {
+            info!("{} shards", total_shards);
+        }
         _ => {}
     }
     Ok(())
@@ -59,15 +61,16 @@ async fn event_handler(
 
 #[tokio::main]
 async fn main() {
-    let clargs = CLArgs::parse();
+    let clargs: CLArgs = CLArgs::parse();
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("Failed to install rustls crypto provider");
     let _ = dotenvy::dotenv();
-    let token = env::var("DISCORD_TOKEN").expect("'DISCORD_TOKEN' environment variable not set");
+    let token: String =
+        env::var("DISCORD_TOKEN").expect("'DISCORD_TOKEN' environment variable not set");
 
     if clargs.loglevel != "none" {
-        let mut builder = Builder::new();
+        let mut builder: Builder = Builder::new();
 
         match clargs.loglevel.to_lowercase().as_str() {
             "trace" => {
@@ -88,19 +91,19 @@ async fn main() {
             &_ => {}
         }
     } else {
-        let env = env_logger::Env::new();
+        let env: Env<'_> = Env::new();
         env_logger::init_from_env(env);
     }
 
     info!("Starting...");
 
-    let intents = serenity::GatewayIntents::GUILD_MESSAGES
-        | serenity::GatewayIntents::DIRECT_MESSAGES
-        | serenity::GatewayIntents::MESSAGE_CONTENT
-        | serenity::GatewayIntents::GUILDS
-        | serenity::GatewayIntents::GUILD_VOICE_STATES;
+    let intents: GatewayIntents = GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::DIRECT_MESSAGES
+        | GatewayIntents::MESSAGE_CONTENT
+        | GatewayIntents::GUILDS
+        | GatewayIntents::GUILD_VOICE_STATES;
 
-    let prefix = match env::var("NOOQIE_PREFIX") {
+    let prefix: String = match env::var("NOOQIE_PREFIX") {
         Ok(prefix) => prefix,
         Err(_error) => String::from("!"),
     };
@@ -119,7 +122,7 @@ async fn main() {
             clear(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
-            prefix: Some(prefix.into()),
+            prefix: Some(prefix),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
                 Duration::from_secs(3600),
             ))),
@@ -153,7 +156,7 @@ async fn main() {
         .options(options)
         .build();
 
-    let mut client = serenity::Client::builder(&token, intents)
+    let mut client: Client = Client::builder(&token, intents)
         .framework(framework)
         .register_songbird()
         .type_map_insert::<HttpKey>(HttpClient::new())
