@@ -1,5 +1,4 @@
 use crate::{Context, Error};
-use poise::serenity_prelude::standard::CommandResult;
 
 #[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
 pub async fn ping(
@@ -7,7 +6,7 @@ pub async fn ping(
     #[description = "send ping, get pong"]
     #[autocomplete = "poise::builtins::autocomplete_command"]
     _command: Option<String>,
-) -> CommandResult {
+) -> Result<(), Error> {
     ctx.say("pong!").await?;
     Ok(())
 }
