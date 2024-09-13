@@ -1,6 +1,5 @@
 use log::{debug, error, warn};
 
-use poise::serenity_prelude::standard::CommandResult;
 use poise::serenity_prelude::ActivityData;
 use poise::serenity_prelude::OnlineStatus;
 use poise::CreateReply;
@@ -37,7 +36,7 @@ pub async fn llm(
     #[autocomplete = "poise::builtins::autocomplete_command"]
     #[rest]
     msg: Option<String>,
-) -> CommandResult {
+) -> Result<(), Error> {
     let ser_ctx: &poise::serenity_prelude::Context = ctx.serenity_context();
     let mut status: OnlineStatus = OnlineStatus::DoNotDisturb;
     let mut activity: ActivityData = ActivityData::custom("thinking...");
