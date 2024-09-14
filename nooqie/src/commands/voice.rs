@@ -1,4 +1,4 @@
-use crate::Context;
+use crate::{Context, Error};
 
 use poise::{
     async_trait,
@@ -21,7 +21,7 @@ impl TypeMapKey for HttpKey {
 }
 
 #[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
-pub async fn join(ctx: Context<'_>) -> CommandResult {
+pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     let (guild_id, channel_id) = {
         let guild = ctx.guild().unwrap();
         let channel_id = guild
