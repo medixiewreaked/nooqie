@@ -114,7 +114,7 @@ impl VoiceEventHandler for TrackErrorNotifier {
 pub async fn play(
     ctx: Context<'_>,
     #[description = "Youtube URL"] msg: Option<String>,
-) -> CommandResult {
+) -> Result<(), Error> {
     let (guild_id, channel_id) = {
         let guild = ctx.guild().unwrap();
         let channel_id = guild
