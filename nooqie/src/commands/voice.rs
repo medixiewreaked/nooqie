@@ -316,7 +316,7 @@ pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
 
 // #[description = "pauses current audio track"]
 #[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
-pub async fn pause(ctx: Context<'_>) -> CommandResult {
+pub async fn pause(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
         let guild = ctx.guild().unwrap();
         guild.id
