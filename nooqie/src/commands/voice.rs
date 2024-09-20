@@ -342,7 +342,7 @@ pub async fn pause(ctx: Context<'_>) -> Result<(), Error> {
 
 // #[description = "resumes current audio track"]
 #[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
-pub async fn resume(ctx: Context<'_>) -> CommandResult {
+pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
         let guild = ctx.guild().unwrap();
         guild.id
