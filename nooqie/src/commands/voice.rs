@@ -10,6 +10,7 @@ use log::{debug, error, info, warn};
 use songbird::{
     events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent},
     input::YoutubeDl,
+    tracks::TrackHandle,
 };
 
 use reqwest::Client as HttpClient;
@@ -171,7 +172,7 @@ pub async fn play(
         let mut handler = handler_lock.lock().await;
         let current_channel = handler.current_channel().unwrap().to_string();
         let src = YoutubeDl::new(http_client, url);
-        let _song = handler.enqueue_input(src.into()).await;
+        let _song: TrackHandle = handler.enqueue_input(src.into()).await;
 
         ctx.serenity_context().set_presence(
             Some(ActivityData::custom("Darude -Sandstorm")),
@@ -361,6 +362,32 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
         let _ = queue.resume();
     } else {
         warn!("failed to resume audio track, aborting");
+    }
+
+    Ok(())
+}
+
+#[poise::command(prefix_command, track_edits, slash_command)]
+pub async fn loop_track(ctx: Context<'_>) -> Result<(), Error> {
+    let guild_id = {
+        let guild = ctx.guild().unwrap();
+        guild.id
+    };
+
+    let manager = songbird::get(ctx.as_ref())
+        .await
+        .expect("Songbird Voice client placed in at initialisation.")
+        .clone();
+
+    if let Some(handler_lock) = manager.get(guild_id) {
+        let handler = handler_lock.lock().await;
+        let current_channel: String = handler.current_channel().unwrap().to_string();
+        let queue = handler.queue();
+        let current = queue.current().unwrap();
+        debug!("{}: looping audio track", current_channel);
+        let _ = current.enable_loop();
+    } else {
+        warn!("failed to loop audio track, aborting");
     }
 
     Ok(())
