@@ -367,7 +367,7 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(prefix_command, track_edits, slash_command)]
+#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
 pub async fn loop_track(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
         let guild = ctx.guild().unwrap();

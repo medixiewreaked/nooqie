@@ -120,6 +120,7 @@ async fn main() {
             resume(),
             skip(),
             clear(),
+            loop_track(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some(prefix),
