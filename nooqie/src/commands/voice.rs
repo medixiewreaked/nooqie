@@ -368,7 +368,10 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 #[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
-pub async fn loop_track(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn loop_track(
+    ctx: Context<'_>,
+    #[description = "Amount"] msg: Option<String>,
+) -> Result<(), Error> {
     let guild_id = {
         let guild = ctx.guild().unwrap();
         guild.id
@@ -379,13 +382,24 @@ pub async fn loop_track(ctx: Context<'_>) -> Result<(), Error> {
         .expect("Songbird Voice client placed in at initialisation.")
         .clone();
 
+    let amount = match msg {
+        Some(msg) => msg,
+        None => String::from("0"),
+    };
+
+    let loops: usize = amount.parse::<usize>().unwrap();
+
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
         let current_channel: String = handler.current_channel().unwrap().to_string();
         let queue = handler.queue();
         let current = queue.current().unwrap();
-        debug!("{}: looping audio track", current_channel);
-        let _ = current.enable_loop();
+        if loops == 0 {
+            debug!("{}: looping audio track", current_channel);
+            let _ = current.enable_loop();
+        } else {
+            let _ = current.loop_for(loops);
+        }
     } else {
         warn!("failed to loop audio track, aborting");
     }
