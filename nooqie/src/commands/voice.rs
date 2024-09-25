@@ -398,6 +398,7 @@ pub async fn loop_track(
             debug!("{}: looping audio track", current_channel);
             let _ = current.enable_loop();
         } else {
+            debug!("looping audio track for {}", loops);
             let _ = current.loop_for(loops);
         }
     } else {
