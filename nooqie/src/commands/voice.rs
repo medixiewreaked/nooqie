@@ -181,21 +181,6 @@ pub async fn play(
 
         info!("playing in {}", current_channel);
 
-    //         if loop_amount > 0 {
-    //             let _ = song.loop_for(loop_amount);
-    //         };
-
-    //         debug!(
-    //             "{}: added track to queue, looping {} times",
-    //             current_channel,
-    //             loop_amount.to_string().as_str()
-    //         );
-
-    //         let _ = song.add_event(
-    //             Event::Track(TrackEvent::Play),
-    //             AudioTrackStart { ctx: ctx.clone() },
-    //         );
-    //
     //         let _ = song.add_event(
     //             Event::Track(TrackEvent::End),
     //             AudioTrackEnd {
