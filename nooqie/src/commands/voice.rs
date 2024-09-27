@@ -146,14 +146,6 @@ pub async fn play(
         }
     };
 
-    //     let loop_amount = match args.single::<usize>() {
-    //         Ok(loop_amount) => loop_amount,
-    //         Err(_error) => {
-    //             let loop_amount = 0;
-    //             loop_amount
-    //         }
-    //     };
-
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
         let current_channel = handler.current_channel().unwrap().to_string();
