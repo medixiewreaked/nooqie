@@ -56,7 +56,13 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 // #[description = "leaves current voice channel"]
-#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    aliases("fuckoff", "fuck off"),
+    category = "Voice"
+)]
 pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
         let guild = ctx.guild().unwrap();
