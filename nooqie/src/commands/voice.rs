@@ -362,7 +362,13 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    aliases("loop"),
+    category = "Voice"
+)]
 pub async fn loop_track(
     ctx: Context<'_>,
     #[description = "Amount"] msg: Option<String>,
