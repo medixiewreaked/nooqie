@@ -247,7 +247,13 @@ pub async fn play(
 // }
 
 // #[description = "skips current audio track"]
-#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    aliases("next"),
+    category = "Voice"
+)]
 pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
         let guild = ctx.guild().unwrap();
