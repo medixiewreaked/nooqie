@@ -21,7 +21,13 @@ impl TypeMapKey for HttpKey {
     type Value = HttpClient;
 }
 
-#[poise::command(prefix_command, track_edits, slash_command, category = "Voice")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    aliases("vc", "voice"),
+    category = "Voice"
+)]
 pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     let (guild_id, channel_id) = {
         let guild = ctx.guild().unwrap();
