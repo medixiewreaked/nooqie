@@ -29,7 +29,7 @@ struct AIResponse {
     eval_duration: u64,
 }
 
-#[poise::command(prefix_command, track_edits, aliases("query"), slash_command)]
+#[poise::command(prefix_command, track_edits, aliases("ollama", "query"), slash_command)]
 pub async fn llm(
     ctx: Context<'_>,
     #[description = "queries offline local Ollama instance"]
