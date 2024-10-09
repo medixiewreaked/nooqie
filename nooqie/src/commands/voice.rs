@@ -66,7 +66,7 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     prefix_command,
     track_edits,
     slash_command,
-    aliases("fuckoff", "fuck off"),
+    aliases("fuckoff", "fuck off", "get out"),
     category = "Voice"
 )]
 pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
