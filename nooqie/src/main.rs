@@ -112,6 +112,7 @@ async fn main() {
         commands: vec![
             help(),
             ping(),
+            pong(),
             llm(),
             join(),
             leave(),

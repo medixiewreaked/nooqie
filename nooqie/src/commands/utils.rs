@@ -12,6 +12,17 @@ pub async fn ping(
 }
 
 #[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
+pub async fn pong(
+    ctx: Context<'_>,
+    #[description = "send pong, get ping"]
+    #[autocomplete = "poise::builtins::autocomplete_command"]
+    _command: Option<String>,
+) -> Result<(), Error> {
+    ctx.say("ping!").await?;
+    Ok(())
+}
+
+#[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
 pub async fn help(
     ctx: Context<'_>,
     #[description = "Show help"]
