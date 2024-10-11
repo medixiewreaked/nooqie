@@ -30,7 +30,13 @@ impl TypeMapKey for HttpKey {
 )]
 pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     let (guild_id, channel_id) = {
-        let guild = ctx.guild().unwrap();
+        let guild = match ctx.guild() {
+            Some(guild) => guild,
+            None => {
+                warn!("user not in guild");
+                return Ok(());
+            }
+        };
         let channel_id = guild
             .voice_states
             .get(ctx.author().id.as_ref())
