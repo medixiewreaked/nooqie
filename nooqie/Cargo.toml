@@ -1,7 +1,7 @@
 [package]
 name = "nooqie"
 description = "Nooqie is a Discord bot with basic LLM functionality though the Ollama API"
-version = "0.12.3"
+version = "0.12.4"
 edition = "2021"
 
 [dependencies]
