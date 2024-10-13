@@ -147,7 +147,14 @@ pub async fn play(
     #[description = "Youtube URL"] msg: Option<String>,
 ) -> Result<(), Error> {
     let (guild_id, channel_id) = {
-        let guild = ctx.guild().unwrap();
+        let guild = match ctx.guild() {
+            Some(guild) => guild,
+            None => {
+                warn!("bot not in guild");
+                return Ok(());
+            }
+        };
+
         let channel_id = guild
             .voice_states
             .get(ctx.author().id.as_ref())
