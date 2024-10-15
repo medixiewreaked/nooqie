@@ -326,7 +326,14 @@ pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
 )]
 pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
-        let guild = ctx.guild().unwrap();
+        let guild = match ctx.guild() {
+            Some(guild) => guild,
+            None => {
+                warn!("bot not in guild");
+                return Ok(());
+            }
+        };
+
         guild.id
     };
 
