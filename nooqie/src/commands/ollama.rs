@@ -42,9 +42,15 @@ pub async fn llm(
     let mut activity: ActivityData = ActivityData::custom("thinking...");
     ctx.serenity_context().set_presence(Some(activity), status);
 
-    let prompt: &str = &msg.unwrap();
+    let prompt = match msg {
+        Some(prompt) => prompt,
+        None => {
+            warn!("no prompt provided");
+            return Ok(());
+        }
+    };
 
-    debug!("{}: prompt '{}'", ctx.channel_id(), prompt);
+    debug!("{}: prompt '{}'", ctx.channel_id(), &prompt);
 
     let new_msg = ctx.say("...").await.expect("");
 
@@ -52,7 +58,6 @@ pub async fn llm(
 
     debug!("{}: anwser '{}'", ctx.channel_id(), anwser);
 
-    // let builder = EditMessage::new().content(anwser.clone());
     let builder = CreateReply::default().content(anwser.clone());
 
     if let Err(error) = new_msg.edit(ctx, builder).await {
@@ -68,7 +73,7 @@ pub async fn llm(
     Ok(())
 }
 
-pub async fn prompt_ollama(prompt: &str) -> Result<String, Error> {
+pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
     let model = env::var("OLLAMA_MODEL").expect("'OLLAMA_MODEL' environment variable not set");
 
     let post_url = env::var("OLLAMA_POST_URL").expect("'OLLAMA_IP' environment variable not set");
