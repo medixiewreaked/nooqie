@@ -102,7 +102,13 @@ pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
-        current_channel = handler.current_channel().unwrap().to_string();
+        current_channel = match handler.current_channel() {
+            Some(channel) => channel.to_string(),
+            None => {
+                warn!("user not in voice channel, aborting");
+                return Ok(());
+            }
+        };
     } else {
         warn!("can't leave not in voice channel, aborting");
     }
