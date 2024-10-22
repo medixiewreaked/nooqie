@@ -197,7 +197,14 @@ pub async fn play(
 
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
-        let current_channel = handler.current_channel().unwrap().to_string();
+        let current_channel = match handler.current_channel() {
+            Some(channel) => channel.to_string(),
+            None => {
+                warn!("user not in voice channel, aborting");
+                return Ok(());
+            }
+        };
+
         debug!("{}: joined channel", current_channel);
         handler.add_global_event(TrackEvent::Error.into(), TrackErrorNotifier);
     }
