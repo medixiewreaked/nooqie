@@ -469,7 +469,14 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
-        let current_channel = handler.current_channel().unwrap().to_string();
+        let current_channel = match handler.current_channel() {
+            Some(channel) => channel.to_string(),
+            None => {
+                warn!("user not in voice channel, aborting");
+                return Ok(());
+            }
+        };
+
         let queue = handler.queue();
         debug!("{}: resuming audio track", current_channel);
         let _ = queue.resume();
