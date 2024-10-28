@@ -524,7 +524,14 @@ pub async fn loop_track(
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
-        let current_channel: String = handler.current_channel().unwrap().to_string();
+        let current_channel = match handler.current_channel() {
+            Some(channel) => channel.to_string(),
+            None => {
+                warn!("user not in voice channel, aborting");
+                return Ok(());
+            }
+        };
+
         let queue = handler.queue();
         let current = queue.current().unwrap();
         if loops == 0 {
