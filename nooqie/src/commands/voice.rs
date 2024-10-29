@@ -533,7 +533,13 @@ pub async fn loop_track(
         };
 
         let queue = handler.queue();
-        let current = queue.current().unwrap();
+        let current = match queue.current() {
+            Some(current) => current,
+            None => {
+                warn!("no track to loop");
+                return Ok(());
+            }
+        };
         if loops == 0 {
             debug!("{}: looping audio track", current_channel);
             let _ = current.enable_loop();
