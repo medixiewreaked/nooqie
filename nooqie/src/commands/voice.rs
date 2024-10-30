@@ -520,7 +520,13 @@ pub async fn loop_track(
         None => String::from("0"),
     };
 
-    let loops: usize = amount.parse::<usize>().unwrap();
+    let loops: usize = match amount.parse::<usize>() {
+        Ok(loops) => loops,
+        Err(error) => {
+            warn!("unable to parse loop amount: {}", error);
+            return Ok(());
+        }
+    };
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
