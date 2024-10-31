@@ -54,7 +54,13 @@ pub async fn llm(
 
     let new_msg = ctx.say("...").await.expect("");
 
-    let anwser = prompt_ollama(prompt).await.unwrap();
+    let anwser = match prompt_ollama(prompt).await {
+        Ok(anwser) => anwser,
+        Err(error) => {
+            warn!("failed to get response: {}", error);
+            return Ok(());
+        }
+    };
 
     debug!("{}: anwser '{}'", ctx.channel_id(), anwser);
 
