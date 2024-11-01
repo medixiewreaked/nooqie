@@ -235,73 +235,12 @@ pub async fn play(
         );
 
         info!("playing in {}", current_channel);
-
-    //         let _ = song.add_event(
-    //             Event::Track(TrackEvent::End),
-    //             AudioTrackEnd {
-    //                 manager,
-    //                 guild_id,
-    //                 ctx: ctx.clone(),
-    //             },
-    //         );
     } else {
         warn!("no search available, aborting");
     }
 
     Ok(())
 }
-//
-// struct AudioTrackEnd {
-//     manager: Arc<Songbird>,
-//     guild_id: GuildId,
-//     ctx: Context,
-// }
-//
-// #[async_trait]
-// impl VoiceEventHandler for AudioTrackEnd {
-//     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
-//         let mut current_channel = String::from("");
-//
-//         if let Some(handler_lock) = self.manager.get(self.guild_id) {
-//             let handler = handler_lock.lock().await;
-//             current_channel = handler.current_channel().unwrap().to_string();
-//             if handler.queue().len() > 0 {
-//                 return None;
-//             }
-//         }
-//
-//         let has_handler = self.manager.get(self.guild_id).is_some();
-//
-//         if has_handler {
-//             if let Err(error) = self.manager.remove(self.guild_id).await {
-//                 error!("{}: failed to disconnect: {:?}", current_channel, error);
-//             }
-//             debug!("{}: disconnected from voice channel", current_channel);
-//             let status = OnlineStatus::Online;
-//             let activity = ActivityData::custom("");
-//             self.ctx.set_presence(Some(activity), status);
-//         } else {
-//             warn!("not in voice channel, aborting");
-//         }
-//
-//         None
-//     }
-// }
-//
-// struct AudioTrackStart {
-//     ctx: Context,
-// }
-//
-// #[async_trait]
-// impl VoiceEventHandler for AudioTrackStart {
-//     async fn act(&self, _ctx: &EventContext<'_>) -> Option<Event> {
-//         let status = OnlineStatus::DoNotDisturb;
-//         let activity = ActivityData::playing("Darude - Sandstorm");
-//         self.ctx.set_presence(Some(activity), status);
-//
-//         None
-//     }
-// }
 
 // #[description = "skips current audio track"]
 #[poise::command(
