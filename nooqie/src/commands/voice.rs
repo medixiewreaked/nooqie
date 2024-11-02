@@ -146,7 +146,6 @@ impl VoiceEventHandler for TrackErrorNotifier {
 }
 
 // #[description = "plays audio track from YouTube link"]
-// async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[poise::command(
     prefix_command,
     track_edits,
