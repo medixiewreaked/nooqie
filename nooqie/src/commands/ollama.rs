@@ -1,7 +1,7 @@
 use log::{debug, error, warn};
 
-use poise::serenity_prelude::ActivityData;
 use poise::serenity_prelude::OnlineStatus;
+use poise::serenity_prelude::{ActivityData, CreateMessage};
 use poise::CreateReply;
 
 use regex::Regex;
@@ -64,6 +64,20 @@ pub async fn llm(
 
     debug!("{}: anwser '{}'", ctx.channel_id(), anwser);
 
+    let anwser_length = anwser.len();
+    if anwser_length > 2000 {
+        let mut anwsers: Vec<String> = Vec::new();
+        for i in (0..anwser_length).step_by(1000) {
+            anwsers.push(anwser[i..std::cmp::min(i + 1000, anwser_length)].to_string());
+        }
+        for message in anwsers {
+            debug!("{message}");
+            let builder = CreateMessage::new().content(message);
+            let _ = ctx.channel_id().send_message(ctx.http(), builder).await;
+        }
+        return Ok(());
+    };
+
     let builder = CreateReply::default().content(anwser.clone());
 
     if let Err(error) = new_msg.edit(ctx, builder).await {
@@ -116,6 +130,11 @@ pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
 }
 
 pub fn json_strip_escape(string: &str) -> String {
+    // TODO:
+    // * create vector with all regex strings
+    // * loop through
+    // * replace 'unwrap's with match expressions or if let statements
+    // * change return value to a 'Result<_, err>'
     let re_reverse_solidus = Regex::new(r#"\\"#).unwrap();
     let re_solidus = Regex::new(r#"/"#).unwrap();
     let re_quotation_mark = Regex::new(r#"""#).unwrap();
