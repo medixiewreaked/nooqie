@@ -2,7 +2,7 @@ use clap::{crate_description, Parser};
 
 use env_logger::{Builder, Env};
 
-use log::{error, info, LevelFilter};
+use log::{debug, error, info, LevelFilter};
 
 use poise::serenity_prelude as serenity;
 use poise::serenity_prelude::{Client, GatewayIntents};
@@ -133,12 +133,12 @@ async fn main() {
         on_error: |error| Box::pin(on_error(error)),
         pre_command: |ctx| {
             Box::pin(async move {
-                info!("Executing command {}...", ctx.command().qualified_name);
+                debug!("Executing {} ==========", ctx.command().qualified_name);
             })
         },
         post_command: |ctx| {
             Box::pin(async move {
-                info!("Executed command {}!", ctx.command().qualified_name);
+                debug!("Executed {} ==========", ctx.command().qualified_name);
             })
         },
         skip_checks_for_owners: false,
