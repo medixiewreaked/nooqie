@@ -2,7 +2,7 @@ use clap::{crate_description, Parser};
 
 use env_logger::{Builder, Env};
 
-use log::{debug, error, info, LevelFilter};
+use log::{debug, error, info, warn, LevelFilter};
 
 use poise::serenity_prelude as serenity;
 use poise::serenity_prelude::{Client, GatewayIntents};
@@ -32,6 +32,9 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
         poise::FrameworkError::Command { error, ctx, .. } => {
             error!("Error in command `{}`: {:?}", ctx.command().name, error,);
+        }
+        poise::FrameworkError::GuildOnly { ctx, .. } => {
+            warn!("{}: bot not in guild", ctx.author());
         }
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
