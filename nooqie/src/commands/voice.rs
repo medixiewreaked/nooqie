@@ -384,6 +384,7 @@ pub async fn pause(ctx: Context<'_>) -> Result<(), Error> {
     prefix_command,
     track_edits,
     slash_command,
+    guild_only = true,
     aliases("continue"),
     category = "Voice"
 )]
