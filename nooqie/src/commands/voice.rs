@@ -246,6 +246,7 @@ pub async fn play(
     prefix_command,
     track_edits,
     slash_command,
+    guild_only = true,
     aliases("next"),
     category = "Voice"
 )]
