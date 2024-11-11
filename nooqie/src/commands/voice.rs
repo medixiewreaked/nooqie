@@ -150,6 +150,7 @@ impl VoiceEventHandler for TrackErrorNotifier {
     prefix_command,
     track_edits,
     slash_command,
+    guild_only = true,
     aliases("yt"),
     category = "Voice"
 )]
