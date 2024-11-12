@@ -78,6 +78,7 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     prefix_command,
     track_edits,
     slash_command,
+    guild_only = true,
     aliases("fuckoff", "fuck off", "get out"),
     category = "Voice"
 )]
