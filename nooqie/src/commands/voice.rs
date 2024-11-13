@@ -25,6 +25,7 @@ impl TypeMapKey for HttpKey {
     prefix_command,
     track_edits,
     slash_command,
+    guild_only = true,
     aliases("vc", "voice"),
     category = "Voice"
 )]
