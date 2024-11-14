@@ -36,6 +36,9 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
         poise::FrameworkError::GuildOnly { ctx, .. } => {
             warn!("{}: bot not in guild", ctx.author());
         }
+        poise::FrameworkError::UnknownCommand { msg_content, .. } => {
+            error!("Unknown Command: `{}`", msg_content);
+        }
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
                 error!("Error while handling error: {}", e)
