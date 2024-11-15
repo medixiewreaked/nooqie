@@ -123,7 +123,7 @@ pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
             Ok(air.response)
         }
         Err(error) => {
-            warn!("failed to connect to Ollama server: {error}");
+            error!("failed to connect to Ollama server: {error}");
             Ok(String::from("I seem to have dropped my brain :brain:"))
         }
     }
