@@ -1,6 +1,12 @@
 use crate::{Context, Error};
 
-#[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    broadcast_typing = true,
+    category = "Utility"
+)]
 pub async fn ping(
     ctx: Context<'_>,
     #[description = "send ping, get pong"]
