@@ -17,7 +17,13 @@ pub async fn ping(
     Ok(())
 }
 
-#[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    broadcast_typing = true,
+    category = "Utility"
+)]
 pub async fn pong(
     ctx: Context<'_>,
     #[description = "send pong, get ping"]
