@@ -34,7 +34,13 @@ pub async fn pong(
     Ok(())
 }
 
-#[poise::command(prefix_command, track_edits, slash_command, category = "Utility")]
+#[poise::command(
+    prefix_command,
+    track_edits,
+    slash_command,
+    broadcast_typing = true,
+    category = "Utility"
+)]
 pub async fn help(
     ctx: Context<'_>,
     #[description = "Show help"]
