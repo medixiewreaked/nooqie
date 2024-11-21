@@ -5,7 +5,8 @@ use crate::{Context, Error};
     track_edits,
     slash_command,
     broadcast_typing = true,
-    category = "Utility"
+    category = "Utility",
+    help_text_fn = ping_help
 )]
 pub async fn ping(
     ctx: Context<'_>,
@@ -15,6 +16,10 @@ pub async fn ping(
 ) -> Result<(), Error> {
     ctx.say("pong!").await?;
     Ok(())
+}
+
+pub fn ping_help() -> String {
+    String::from("send ping, get pong")
 }
 
 #[poise::command(
