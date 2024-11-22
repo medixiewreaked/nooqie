@@ -34,11 +34,11 @@ struct AIResponse {
     track_edits,
     aliases("ollama", "query"),
     broadcast_typing = true,
-    slash_command
+    slash_command,
+    help_text_fn = llm_help
 )]
 pub async fn llm(
     ctx: Context<'_>,
-    #[description = "queries offline local Ollama instance"]
     #[autocomplete = "poise::builtins::autocomplete_command"]
     #[rest]
     msg: Option<String>,
@@ -97,6 +97,10 @@ pub async fn llm(
     activity = ActivityData::custom("");
     ser_ctx.set_presence(Some(activity), status);
     Ok(())
+}
+
+pub fn llm_help() -> String {
+    String::from("queries offline local Ollama instance")
 }
 
 pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
