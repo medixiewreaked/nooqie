@@ -27,7 +27,8 @@ impl TypeMapKey for HttpKey {
     slash_command,
     guild_only = true,
     aliases("vc", "voice"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = join_help
 )]
 pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     let (guild_id, channel_id) = {
@@ -72,6 +73,10 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+pub fn join_help() -> String {
+    String::from("joins current voice channel")
 }
 
 // #[description = "leaves current voice channel"]
