@@ -163,7 +163,8 @@ impl VoiceEventHandler for TrackErrorNotifier {
     slash_command,
     guild_only = true,
     aliases("yt"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = play_help
 )]
 pub async fn play(
     ctx: Context<'_>,
@@ -251,6 +252,10 @@ pub async fn play(
     }
 
     Ok(())
+}
+
+pub fn play_help() -> String {
+    String::from("plays audio track from YouTube link")
 }
 
 // #[description = "skips current audio track"]
