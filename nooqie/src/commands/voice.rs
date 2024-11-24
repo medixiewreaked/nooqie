@@ -79,14 +79,14 @@ pub fn join_help() -> String {
     String::from("joins current voice channel")
 }
 
-// #[description = "leaves current voice channel"]
 #[poise::command(
     prefix_command,
     track_edits,
     slash_command,
     guild_only = true,
     aliases("fuckoff", "fuck off", "get out"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = leave_help
 )]
 pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
@@ -132,6 +132,10 @@ pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+pub fn leave_help() -> String {
+    String::from("leaves current voice channel")
 }
 
 struct TrackErrorNotifier;
