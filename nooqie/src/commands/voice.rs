@@ -156,7 +156,6 @@ impl VoiceEventHandler for TrackErrorNotifier {
     }
 }
 
-// #[description = "plays audio track from YouTube link"]
 #[poise::command(
     prefix_command,
     track_edits,
@@ -258,14 +257,14 @@ pub fn play_help() -> String {
     String::from("plays audio track from YouTube link")
 }
 
-// #[description = "skips current audio track"]
 #[poise::command(
     prefix_command,
     track_edits,
     slash_command,
     guild_only = true,
     aliases("next"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = skip_help
 )]
 pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
@@ -303,6 +302,10 @@ pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+pub fn skip_help() -> String {
+    String::from("skips current audio track")
 }
 
 // #[description = "clears audio track queue"]
