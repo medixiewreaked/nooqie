@@ -308,14 +308,14 @@ pub fn skip_help() -> String {
     String::from("skips current audio track")
 }
 
-// #[description = "clears audio track queue"]
 #[poise::command(
     prefix_command,
     track_edits,
     slash_command,
     guild_only = true,
     aliases("stop"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = clear_help
 )]
 pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
@@ -353,6 +353,10 @@ pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+pub fn clear_help() -> String {
+    String::from("clears audio track queue")
 }
 
 // #[description = "pauses current audio track"]
