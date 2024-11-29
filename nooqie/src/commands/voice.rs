@@ -410,14 +410,14 @@ pub fn pause_help() -> String {
     String::from("pauses current audio track")
 }
 
-// #[description = "resumes current audio track"]
 #[poise::command(
     prefix_command,
     track_edits,
     slash_command,
     guild_only = true,
     aliases("continue"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = resume_help
 )]
 pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = {
@@ -455,6 +455,10 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+pub fn resume_help() -> String {
+    String::from("resumes current audio track")
 }
 
 #[poise::command(
