@@ -467,7 +467,8 @@ pub fn resume_help() -> String {
     slash_command,
     guild_only = true,
     aliases("loop"),
-    category = "Voice"
+    category = "Voice",
+    help_text_fn = loop_help
 )]
 pub async fn loop_track(
     ctx: Context<'_>,
@@ -533,4 +534,8 @@ pub async fn loop_track(
     }
 
     Ok(())
+}
+
+pub fn loop_help() -> String {
+    String::from("loops current audio track")
 }
