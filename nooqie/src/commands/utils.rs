@@ -10,9 +10,6 @@ use crate::{Context, Error};
 )]
 pub async fn ping(
     ctx: Context<'_>,
-    #[description = "send ping, get pong"]
-    #[autocomplete = "poise::builtins::autocomplete_command"]
-    _command: Option<String>,
 ) -> Result<(), Error> {
     ctx.say("pong!").await?;
     Ok(())
