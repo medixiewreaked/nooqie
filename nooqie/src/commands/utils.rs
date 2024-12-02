@@ -8,9 +8,7 @@ use crate::{Context, Error};
     category = "Utility",
     help_text_fn = ping_help
 )]
-pub async fn ping(
-    ctx: Context<'_>,
-) -> Result<(), Error> {
+pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("pong!").await?;
     Ok(())
 }
@@ -27,10 +25,7 @@ pub fn ping_help() -> String {
     category = "Utility",
     help_text_fn = pong_help
 )]
-pub async fn pong(
-    ctx: Context<'_>,
-    #[autocomplete = "poise::builtins::autocomplete_command"] _command: Option<String>,
-) -> Result<(), Error> {
+pub async fn pong(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("ping!").await?;
     Ok(())
 }
