@@ -313,7 +313,7 @@ pub fn skip_help() -> String {
     track_edits,
     slash_command,
     guild_only = true,
-    aliases("stop"),
+    aliases("stop", "finish"),
     category = "Voice",
     help_text_fn = clear_help
 )]
