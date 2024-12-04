@@ -9,7 +9,7 @@ use reqwest::Client;
 
 use serde::{Deserialize, Serialize};
 
-use std::env;
+use std::{env, vec};
 
 use crate::{Context, Error};
 
@@ -140,29 +140,30 @@ pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
 }
 
 pub fn json_strip_escape(string: &str) -> String {
+    let expressions: Vec<(&str, &str)> = vec![
+        (r#"\n"#, r#" "#),  // linefeed
+        (r#"\\"#, r#"\\"#), // reverse solidus
+        (r#"/"#, r#"\/"#),  // solidus
+        (r#"""#, r#"\""#),  // quotation mark
+    ];
+    for exp in expressions {
+        debug!("{}", &string);
+        let s = Regex::new(exp.0).unwrap();
+        let string = s.replace_all(&string, exp.1);
+        debug!("{}", &string);
+    }
+    String::from(string)
     // TODO:
-    // * create vector with all regex strings
-    // * loop through
     // * replace 'unwrap's with match expressions or if let statements
     // * change return value to a 'Result<_, err>'
-    let re_reverse_solidus = Regex::new(r#"\\"#).unwrap();
-    let re_solidus = Regex::new(r#"/"#).unwrap();
-    let re_quotation_mark = Regex::new(r#"""#).unwrap();
     // let re_backspace = Regex::new(r#"\b"#).unwrap();
     // let re_formfeed = Regex::new(r#"\f"#).unwrap();
-    let re_linefeed = Regex::new(r#"\n"#).unwrap();
     // let re_carriage_return = Regex::new(r#"\r"#).unwrap();
     // let re_horizontal_tab = Regex::new(r#"\t"#).unwrap();
     // let re_hex = Regex::new(r#"/\u[a-fA-F0-9]{8}"#).unwrap();
 
-    let string = re_linefeed.replace_all(&string, r#" "#);
     // let string = re_backspace.replace_all(&string, r#" "#);
     // let string = re_formfeed.replace_all(&string, r#" "#);
     // let string = re_carriage_return.replace_all(&string, r#" "#);
     // let string = re_horizontal_tab.replace_all(&string, r#"    "#);
-
-    let string = re_reverse_solidus.replace_all(&string, r#"\\"#);
-    let string = re_solidus.replace_all(&string, r#"\/"#);
-    let string = re_quotation_mark.replace_all(&string, r#"\""#);
-    String::from(string)
 }

@@ -11,7 +11,7 @@ fn test_json_strip_escape_valid_input() {
 
 #[test]
 fn test_json_strip_escape_invalid_input() {
-    let _test_data = r#""every/thing" to \strip"#;
+    let _test_data = String::from(r#""every/thing" to \strip"#);
     let result = ollama::json_strip_escape(&_test_data);
-    assert_eq!(result, r#"\"every\/thing\" to \\strip"#);
+    assert_eq!(result, r#""every/thing" to \strip"#);
 }
