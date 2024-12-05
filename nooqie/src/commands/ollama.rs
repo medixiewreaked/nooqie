@@ -110,8 +110,14 @@ pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
 
     let client: Client = Client::new();
 
-    let model = json_strip_escape(&model);
-    let prompt_fmt = json_strip_escape(&prompt);
+    let model = match json_strip_escape(&model) {
+        Ok(model) => model,
+        Err(error) => return Ok(error.to_string()),
+    };
+    let prompt_fmt = match json_strip_escape(&prompt) {
+        Ok(prompt) => prompt,
+        Err(error) => return Ok(error.to_string()),
+    };
 
     let response = client
         .post(post_url)
@@ -139,7 +145,7 @@ pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
     }
 }
 
-pub fn json_strip_escape(string: &str) -> String {
+pub fn json_strip_escape(string: &str) -> std::result::Result<String, regex::Error> {
     let expressions: Vec<(&str, &str)> = vec![
         (r#"\n"#, r#" "#),  // linefeed
         (r#"\\"#, r#"\\"#), // reverse solidus
@@ -148,11 +154,17 @@ pub fn json_strip_escape(string: &str) -> String {
     ];
     for exp in expressions {
         debug!("{}", &string);
-        let s = Regex::new(exp.0).unwrap();
+        let s = match Regex::new(exp.0) {
+            Ok(re) => re,
+            Err(error) => {
+                debug!("{}", error);
+                return Err(error);
+            }
+        };
         let string = s.replace_all(&string, exp.1);
         debug!("{}", &string);
     }
-    String::from(string)
+    Ok(String::from(string))
     // TODO:
     // * replace 'unwrap's with match expressions or if let statements
     // * change return value to a 'Result<_, err>'
