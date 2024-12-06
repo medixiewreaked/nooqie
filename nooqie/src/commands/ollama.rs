@@ -165,9 +165,6 @@ pub fn json_strip_escape(string: &str) -> std::result::Result<String, regex::Err
         debug!("{}", &string);
     }
     Ok(String::from(string))
-    // TODO:
-    // * replace 'unwrap's with match expressions or if let statements
-    // * change return value to a 'Result<_, err>'
     // let re_backspace = Regex::new(r#"\b"#).unwrap();
     // let re_formfeed = Regex::new(r#"\f"#).unwrap();
     // let re_carriage_return = Regex::new(r#"\r"#).unwrap();
