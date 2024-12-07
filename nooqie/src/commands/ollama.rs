@@ -14,7 +14,7 @@ use std::{env, vec};
 use crate::{Context, Error};
 
 #[derive(Serialize, Deserialize)]
-struct AIResponse {
+struct OllamaResponse {
     model: String,
     created_at: String,
     response: String,
@@ -135,7 +135,7 @@ pub async fn prompt_ollama(prompt: String) -> Result<String, Error> {
                 .text()
                 .await
                 .expect("Invalid response could not parse to text");
-            let air: AIResponse = serde_json::from_str(&response_text)?;
+            let air: OllamaResponse = serde_json::from_str(&response_text)?;
             Ok(air.response)
         }
         Err(error) => {
