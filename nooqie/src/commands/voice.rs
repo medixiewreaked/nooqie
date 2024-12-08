@@ -2,7 +2,7 @@ use crate::{Context, Error};
 
 use poise::{
     async_trait,
-    serenity_prelude::{prelude::TypeMapKey, ActivityData, OnlineStatus},
+    serenity_prelude::{prelude::TypeMapKey, ActivityData, ChannelId, GuildId, OnlineStatus},
 };
 
 use log::{debug, error, info, warn};
@@ -21,6 +21,27 @@ impl TypeMapKey for HttpKey {
     type Value = HttpClient;
 }
 
+async fn get_voice_info(ctx: Context<'_>) -> Result<(GuildId, ChannelId), String> {
+    let (guild_id, channel_id) = {
+        let guild = match ctx.guild() {
+            Some(guild) => guild,
+            None => {
+                return Err(String::from("user not in guild"));
+            }
+        };
+        let channel_id = guild
+            .voice_states
+            .get(ctx.author().id.as_ref())
+            .and_then(|voice_states| voice_states.channel_id);
+        (guild.id, channel_id)
+    };
+
+    match channel_id {
+        Some(thing) => Ok((guild_id, thing)),
+        _ => Err(String::from("user not in voice channel, aborting")),
+    }
+}
+
 #[poise::command(
     prefix_command,
     track_edits,
@@ -31,25 +52,10 @@ impl TypeMapKey for HttpKey {
     help_text_fn = join_help
 )]
 pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
-    let (guild_id, channel_id) = {
-        let guild = match ctx.guild() {
-            Some(guild) => guild,
-            None => {
-                warn!("user not in guild");
-                return Ok(());
-            }
-        };
-        let channel_id = guild
-            .voice_states
-            .get(ctx.author().id.as_ref())
-            .and_then(|voice_states| voice_states.channel_id);
-        (guild.id, channel_id)
-    };
-
-    let connect_to = match channel_id {
-        Some(channel) => channel,
-        None => {
-            warn!("user not in voice channel, aborting");
+    let (guild_id, connect_to) = match get_voice_info(ctx).await {
+        Ok((guild_id, connect_to)) => (guild_id, connect_to),
+        Err(err) => {
+            error!("{err}");
             return Ok(());
         }
     };
