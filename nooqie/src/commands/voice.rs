@@ -175,26 +175,10 @@ pub async fn play(
     ctx: Context<'_>,
     #[description = "Youtube URL"] msg: Option<String>,
 ) -> Result<(), Error> {
-    let (guild_id, channel_id) = {
-        let guild = match ctx.guild() {
-            Some(guild) => guild,
-            None => {
-                warn!("bot not in guild");
-                return Ok(());
-            }
-        };
-
-        let channel_id = guild
-            .voice_states
-            .get(ctx.author().id.as_ref())
-            .and_then(|voice_states| voice_states.channel_id);
-        (guild.id, channel_id)
-    };
-
-    let connect_to = match channel_id {
-        Some(channel) => channel,
-        None => {
-            warn!("user not in voice channel, aborting");
+    let (guild_id, connect_to) = match get_voice_info(ctx).await {
+        Ok((guild_id, connect_to)) => (guild_id, connect_to),
+        Err(err) => {
+            error!("{err}");
             return Ok(());
         }
     };
