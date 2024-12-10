@@ -95,15 +95,12 @@ pub fn join_help() -> String {
     help_text_fn = leave_help
 )]
 pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
-    let guild_id = {
-        let guild = match ctx.guild() {
-            Some(guild) => guild,
-            None => {
-                warn!("bot not in guild");
-                return Ok(());
-            }
-        };
-        guild.id
+    let (guild_id, connect_to) = match get_voice_info(ctx).await {
+        Ok((guild_id, connect_to)) => (guild_id, connect_to),
+        Err(err) => {
+            error!("{err}");
+            return Ok(());
+        }
     };
 
     let manager = songbird::get(ctx.as_ref())
