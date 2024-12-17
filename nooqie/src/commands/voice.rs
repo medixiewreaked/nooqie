@@ -254,8 +254,8 @@ pub fn play_help() -> String {
     help_text_fn = skip_help
 )]
 pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
-    let (guild_id, connect_to) = match get_voice_info(ctx).await {
-        Ok((guild_id, connect_to)) => (guild_id, connect_to),
+    let guild_id = match get_voice_info(ctx).await {
+        Ok(info) => info.0,
         Err(err) => {
             error!("{err}");
             return Ok(());
