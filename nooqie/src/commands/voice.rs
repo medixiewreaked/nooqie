@@ -445,8 +445,8 @@ pub async fn loop_track(
     ctx: Context<'_>,
     #[description = "Amount"] msg: Option<String>,
 ) -> Result<(), Error> {
-    let (guild_id, connect_to) = match get_voice_info(ctx).await {
-        Ok((guild_id, connect_to)) => (guild_id, connect_to),
+    let guild_id = match get_voice_info(ctx).await {
+        Ok(info) => info.0,
         Err(err) => {
             error!("{err}");
             return Ok(());
