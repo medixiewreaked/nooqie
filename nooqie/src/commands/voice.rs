@@ -11,7 +11,10 @@ use songbird::{
     events::{Event, EventContext, EventHandler as VoiceEventHandler, TrackEvent},
     input::YoutubeDl,
     tracks::TrackHandle,
+    Songbird,
 };
+
+use std::sync::Arc;
 
 use reqwest::Client as HttpClient;
 
@@ -39,6 +42,16 @@ async fn get_voice_info(ctx: Context<'_>) -> Result<(GuildId, ChannelId), String
     match channel_id {
         Some(thing) => Ok((guild_id, thing)),
         _ => Err(String::from("user not in voice channel, aborting")),
+    }
+}
+
+async fn get_manager(ctx: Context<'_>) -> Result<Arc<Songbird>, String> {
+    let manager = songbird::get(ctx.as_ref()).await;
+    match manager {
+        Some(manager) => Ok(manager.clone()),
+        _ => Err(String::from(
+            "Songbird Voice client placed in at initialisation.",
+        )),
     }
 }
 
