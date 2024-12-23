@@ -73,10 +73,13 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
         }
     };
 
-    let manager = songbird::get(ctx.as_ref())
-        .await
-        .expect("Songbird Voice client placed in at initialisation.")
-        .clone();
+    let manager = match get_manager(ctx).await {
+        Ok(manager) => manager,
+        Err(err) => {
+            error!("{err}");
+            return Ok(());
+        }
+    };
 
     if let Ok(handler_lock) = manager.join(guild_id, connect_to).await {
         let mut handler = handler_lock.lock().await;
