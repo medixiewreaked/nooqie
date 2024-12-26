@@ -284,10 +284,13 @@ pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
         }
     };
 
-    let manager = songbird::get(ctx.as_ref())
-        .await
-        .expect("Songbird Voice client placed in at initialisation.")
-        .clone();
+    let manager = match get_manager(ctx).await {
+        Ok(manager) => manager,
+        Err(err) => {
+            error!("{err}");
+            return Ok(());
+        }
+    };
 
     if let Some(handler_lock) = manager.get(guild_id) {
         let handler = handler_lock.lock().await;
