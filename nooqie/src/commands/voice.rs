@@ -487,10 +487,13 @@ pub async fn loop_track(
         }
     };
 
-    let manager = songbird::get(ctx.as_ref())
-        .await
-        .expect("Songbird Voice client placed in at initialisation.")
-        .clone();
+    let manager = match get_manager(ctx).await {
+        Ok(manager) => manager,
+        Err(err) => {
+            error!("{err}");
+            return Ok(());
+        }
+    };
 
     let amount = match msg {
         Some(msg) => msg,
