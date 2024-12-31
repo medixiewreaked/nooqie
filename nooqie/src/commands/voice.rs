@@ -97,10 +97,6 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn join_help() -> String {
-    String::from("joins current voice channel")
-}
-
 #[poise::command(
     prefix_command,
     track_edits,
@@ -154,10 +150,6 @@ pub async fn leave(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
-}
-
-pub fn leave_help() -> String {
-    String::from("leaves current voice channel")
 }
 
 struct TrackErrorNotifier;
@@ -262,10 +254,6 @@ pub async fn play(
     Ok(())
 }
 
-pub fn play_help() -> String {
-    String::from("plays audio track from YouTube link")
-}
-
 #[poise::command(
     prefix_command,
     track_edits,
@@ -310,10 +298,6 @@ pub async fn skip(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
-}
-
-pub fn skip_help() -> String {
-    String::from("skips current audio track")
 }
 
 #[poise::command(
@@ -362,10 +346,6 @@ pub async fn clear(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn clear_help() -> String {
-    String::from("clears audio track queue")
-}
-
 #[poise::command(
     prefix_command,
     track_edits,
@@ -412,10 +392,6 @@ pub async fn pause(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn pause_help() -> String {
-    String::from("pauses current audio track")
-}
-
 #[poise::command(
     prefix_command,
     track_edits,
@@ -460,10 +436,6 @@ pub async fn resume(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
-}
-
-pub fn resume_help() -> String {
-    String::from("resumes current audio track")
 }
 
 #[poise::command(
@@ -538,6 +510,34 @@ pub async fn loop_track(
     }
 
     Ok(())
+}
+
+pub fn join_help() -> String {
+    String::from("joins current voice channel")
+}
+
+pub fn leave_help() -> String {
+    String::from("leaves current voice channel")
+}
+
+pub fn play_help() -> String {
+    String::from("plays audio track from YouTube link")
+}
+
+pub fn skip_help() -> String {
+    String::from("skips current audio track")
+}
+
+pub fn clear_help() -> String {
+    String::from("clears audio track queue")
+}
+
+pub fn pause_help() -> String {
+    String::from("pauses current audio track")
+}
+
+pub fn resume_help() -> String {
+    String::from("resumes current audio track")
 }
 
 pub fn loop_help() -> String {
